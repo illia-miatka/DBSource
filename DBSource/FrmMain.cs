@@ -314,7 +314,7 @@ namespace DBSource
                         where (checkedListBox_objects.CheckedItems.Contains(obj.NAME) && !checkBox_loadAll.Checked) || (checkBox_loadAll.Checked)
                         select obj);
 
-                    progressBar_saving.Maximum = query.Count() * 2;
+                    progressBar_saving.Maximum = query.Count();
 
                     if (checkBox_LoadMode.Checked)
                         query = (from obj in _objects
@@ -330,7 +330,16 @@ namespace DBSource
                                             Get_type(obj.OBJECT_TYPE).Replace(' ', '_') +
                                             "', '" + obj.OBJECT_NAME + "') AS DDL, '" + obj.OBJECT_NAME +
                                             "' as OBJECT_NAME, '" + obj.OBJECT_TYPE + "' as OBJECT_TYPE  FROM DUAL";
-                            Fill(stringCmd, _ddl, false);
+                            Fill(stringCmd, _ddl);
+
+                            var ddl = (from d in _ddl
+                                select d).First();
+
+                            var path = _path + @"\" +
+                                       (ddl.OBJECT_TYPE == "PACKAGE BODY" ? "PACKAGE" : ddl.OBJECT_TYPE) + @"S\";
+                            Directory.CreateDirectory(path);
+                            path += ddl.OBJECT_NAME + get_object_file_type(ddl.OBJECT_TYPE);
+                            File.WriteAllText(path, ddl.DDL);
                             progressBar_saving.Value++;
                         }
                         catch (Exception ex)
@@ -346,19 +355,10 @@ namespace DBSource
                                     @"Error:" + "[" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
+                                button_control_connect(false);
                                 return;
                             }
                         }
-
-                    }
-
-                    foreach (var ddl in _ddl)
-                    {
-                        var path = _path + @"\" + (ddl.OBJECT_TYPE == "PACKAGE BODY" ? "PACKAGE" : ddl.OBJECT_TYPE) + @"S\";
-                        Directory.CreateDirectory(path);
-                        path += ddl.OBJECT_NAME + get_object_file_type(ddl.OBJECT_TYPE);
-                        File.WriteAllText(path, ddl.DDL);
-                        progressBar_saving.Value++;
                     }
                 }
 
