@@ -1581,11 +1581,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string Name {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.NameColumn]));
+                    if (this.IsNameNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Name\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.NameColumn]));
                     }
                 }
                 set {
@@ -1597,11 +1597,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string Protocol {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.ProtocolColumn]));
+                    if (this.IsProtocolNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Protocol\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.ProtocolColumn]));
                     }
                 }
                 set {
@@ -1613,11 +1613,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string Host {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.HostColumn]));
+                    if (this.IsHostNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Host\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.HostColumn]));
                     }
                 }
                 set {
@@ -1645,11 +1645,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string SID {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.SIDColumn]));
+                    if (this.IsSIDNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'SID\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.SIDColumn]));
                     }
                 }
                 set {
@@ -1661,11 +1661,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string User {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.UserColumn]));
+                    if (this.IsUserNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'User\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.UserColumn]));
                     }
                 }
                 set {
@@ -1677,11 +1677,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string Password {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.PasswordColumn]));
+                    if (this.IsPasswordNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Password\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.PasswordColumn]));
                     }
                 }
                 set {
@@ -1693,11 +1693,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string Type {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.TypeColumn]));
+                    if (this.IsTypeNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'Type\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.TypeColumn]));
                     }
                 }
                 set {
@@ -1709,11 +1709,11 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public string TNS {
                 get {
-                    try {
-                        return ((string)(this[this.tableConnectionList.TNSColumn]));
+                    if (this.IsTNSNull()) {
+                        return string.Empty;
                     }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("The value for column \'TNS\' in table \'ConnectionList\' is DBNull.", e);
+                    else {
+                        return ((string)(this[this.tableConnectionList.TNSColumn]));
                     }
                 }
                 set {

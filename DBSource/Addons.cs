@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBSource
 {
-    static class Addons
+    internal static class Addons
     {
         public static string FirstCharToUpper(string input)
         {
@@ -21,7 +18,7 @@ namespace DBSource
 
         public static string ShowDialog(string text, string caption, string textbox = "")
         {
-            Form prompt = new Form()
+            var prompt = new Form()
             {
                 Width = 500,
                 Height = 150,

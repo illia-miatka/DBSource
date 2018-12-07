@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
-using System.Data.OracleClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace DBSource
@@ -14,9 +14,10 @@ namespace DBSource
         private readonly DataSet.DbObjectTypesDataTable _objectTypes = new DataSet.DbObjectTypesDataTable();
         private readonly DataSet.DbObjectsDataTable _objects = new DataSet.DbObjectsDataTable();
         private readonly DataSet.OBJDataTable _ddl = new DataSet.OBJDataTable();
-        private OracleConnection _con;
+        private DBConnection _con;
         private string _filterObjects = "";
         private string _path = "";
+        private int _backgroundWorkerTaskId;
 
         public FrmMain()
         {
@@ -27,54 +28,37 @@ namespace DBSource
         private void button1_Click(object sender, EventArgs e)
         {
 
-            if (comboBox_Connections.Text == "") { return;  }
+            if (comboBox_Connections.Text == "")
+            {
+                return;
+            }
 
-            var query = from connection in _connectionList
-                        where connection.Name == comboBox_Connections.Text
-                        select connection;
-            var row = query.First();
+            var row = (from connection in _connectionList
+                where connection.Name == comboBox_Connections.Text
+                select connection).First();
 
             _path = row.Path;
 
-            var conString = "Data Source="+row.TNS + ";User Id=" + row.User + ";Password = " + Crypt.Decrypt(row.Password) + ";";
-
-            progressBar_connect.Value = 2;
-
             if (row.IsDirect)
             {
-
-                conString = "Data Source=(DESCRIPTION =(ADDRESS_LIST=(ADDRESS=(PROTOCOL=" + row.Protocol +
-                    ")(HOST=" + row.Host +
-                    ")(PORT=" + row.Port +
-                    ")))(CONNECT_DATA =(SERVICE_NAME=" + row.SID +
-                    ")));User ID=" + row.User +
-                    ";Password=" + Crypt.Decrypt(row.Password) +
-                    ";Unicode=True";
+                _con = new DBConnection(row.User, Crypt.Decrypt(row.Password), row.Protocol, row.Host,
+                    row.Port, row.SID);
             }
-            //string ConString = "Data Source=DATASOURCE;User Id=USERNAME;Password=PWD; ";
-
-            try
+            else
             {
-                button_control_connect(true);
-                progressBar_connect.Value = 3;
-                _con = new OracleConnection(conString);
+                _con = new DBConnection(row.User, Crypt.Decrypt(row.Password), row.TNS);
+            }
 
-                {
-                    var stringCmd = "SELECT DISTINCT OBJECT_TYPE AS NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE<>'LOB' " +
-                                    "UNION " +
-                                    "SELECT DISTINCT OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_TYPE<>'LOB' ";
-                    progressBar_connect.Value = 4;
-                    Fill(stringCmd, _objectTypes);              
-                    progressBar_connect.Value = 5;
-                    fill_checkedListBox_objectTypes();
-                    progressBar_connect.Value = 6;
-                }
-            }
-            catch(Exception ex)
-            {
-                button_control_connect(false);
-                MessageBox.Show(ex.ToString());
-            }
+            button_control_connect(true);
+
+            var stringCmd = "SELECT DISTINCT OBJECT_TYPE AS NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE<>'LOB' " +
+                            "UNION " +
+                            "SELECT DISTINCT OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_TYPE<>'LOB' ";
+            _con.GetQueryResult(stringCmd, _objectTypes);
+
+            _backgroundWorkerTaskId = 1;
+            backgroundWorker2.RunWorkerAsync();
+
         }
 
         private void Frm_Main_Load(object sender, EventArgs e)
@@ -85,16 +69,17 @@ namespace DBSource
         }
 
         private void comboBox_Connections_Refresh(object sender, EventArgs e)
-        {    
+        {
             comboBox_Connections.Items.Clear();
             var query = from connection in _connectionList
-                        orderby connection.Name ascending
-                        select connection.Name;
+                orderby connection.Name ascending
+                select connection.Name;
 
             foreach (var r in query.ToList())
             {
                 comboBox_Connections.Items.Add(r);
             }
+
             comboBox_Connections.Refresh();
 
             save_Data();
@@ -103,31 +88,13 @@ namespace DBSource
 
         private void Frm_Main_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (_con != null && _con.State != ConnectionState.Closed)
+            if (_con != null)
             {
-                _con.Close();
+                if (_con.State() != ConnectionState.Closed)
+                    _con.Close();
             }
+
             save_Data();
-        }
-
-        private void fill_checkedListBox_objectTypes()
-        {
-            foreach (var obj in _objectTypes)
-            {
-                checkedListBox_objectTypes.Items.Add(obj.NAME);
-                checkedListBox_objectTypes.Refresh();
-            }
-        }
-
-        private void fill_checkedListBox_objects()
-        {
-            checkedListBox_objects.Items.Clear();
-
-            foreach (var obj in _objects)
-            {
-                checkedListBox_objects.Items.Add(obj.NAME);
-                checkedListBox_objects.Refresh();
-            }
         }
 
         private void button_disconnect_Click(object sender, EventArgs e)
@@ -149,12 +116,9 @@ namespace DBSource
             button_getSource.Enabled = isConnected;
             checkBox_currentSchema.Enabled = isConnected;
 
-            if (!isConnected)
-            {
-                checkedListBox_objectTypes.Items.Clear();
-                checkedListBox_objects.Items.Clear();
-                progressBar_connect.Value = 0;
-            }
+            if (isConnected) return;
+            checkedListBox_objectTypes.Items.Clear();
+            checkedListBox_objects.Items.Clear();
         }
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
@@ -169,7 +133,8 @@ namespace DBSource
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show(@"Are you sure you want to delete " + comboBox_Connections.Text + @"?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show(@"Are you sure you want to delete " + comboBox_Connections.Text + @"?", Text,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 var query = _connectionList.AsEnumerable()
                     .Where(r => r.Field<string>("Name") == comboBox_Connections.Text);
@@ -198,12 +163,12 @@ namespace DBSource
             {
                 _connectionList.WriteXml("config");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
 
-            
+
         }
 
         private void button_loadObjects_Click(object sender, EventArgs e)
@@ -239,13 +204,12 @@ namespace DBSource
 
                     stringCmd = stringCmd.Remove(stringCmd.Length - 1);
                     stringCmd += ") ";
-
                     stringCmd += _filterObjects != "" ? "AND OBJECT_NAME LIKE ('%" + _filterObjects + "%') " : "";
-
                     stringCmd += "ORDER BY 1";
 
-                    Fill(stringCmd, _objects);
-                    fill_checkedListBox_objects();
+                    _con.GetQueryResult(stringCmd, _objects);
+                    _backgroundWorkerTaskId = 2;
+                    backgroundWorker2.RunWorkerAsync();
                 }
             }
             catch (Exception ex)
@@ -266,17 +230,19 @@ namespace DBSource
             button_addFilter.BackColor = _filterObjects == "" ? default(Color) : Color.LightBlue;
         }
 
-        private void Fill(string stringCmd, DataTable dt, bool clear = true)
-        {
-            var cmd = new OracleCommand(stringCmd, _con);
-            var oda = new OracleDataAdapter(cmd);
-            if(clear) dt.Clear();
-            oda.Fill(dt);
-        }
-
         private void button_getSource_Click(object sender, EventArgs e)
         {
-            if (checkedListBox_objects.CheckedItems.Count == 0 && !checkBox_LoadMode.Checked && !checkBox_loadAll.Checked) return;
+            if (checkedListBox_objects.CheckedItems.Count == 0 && !checkBox_LoadMode.Checked &&
+                !checkBox_loadAll.Checked) return;
+
+            button_getSource.Enabled = false;
+            is_load_All();
+            button_GetSource_Stop.Enabled = true;
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void is_load_All()
+        {
             if (checkBox_loadAll.Checked)
             {
                 try
@@ -295,7 +261,7 @@ namespace DBSource
                                      "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
                                      "FROM  USER_OBJECTS " +
                                      "WHERE OBJECT_TYPE<>'LOB' AND SUBSTR(OBJECT_NAME,1,4) <> 'SYS_'";
-                        Fill(stringCmd, _objects);
+                        _con.GetQueryResult(stringCmd, _objects);
                     }
                 }
                 catch (Exception ex)
@@ -305,74 +271,81 @@ namespace DBSource
                     return;
                 }
             }
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            double progress = 0;
+            double step;
+
             try
             {
-                progressBar_saving.Value = 0;
-                progressBar_saving.Visible = true;
                 {
                     var query = (from obj in _objects
-                        where (checkedListBox_objects.CheckedItems.Contains(obj.NAME) && !checkBox_loadAll.Checked) || (checkBox_loadAll.Checked)
+                        where (checkedListBox_objects.CheckedItems.Contains(obj.NAME) && !checkBox_loadAll.Checked) ||
+                              (checkBox_loadAll.Checked)
                         select obj);
-
-                    progressBar_saving.Maximum = query.Count();
 
                     if (checkBox_LoadMode.Checked)
                         query = (from obj in _objects
                             select obj);
 
+                    step = (double) 100 / query.Count();
                     _ddl.Clear();
 
                     foreach (var obj in query)
                     {
-                        try
+                        if (backgroundWorker1.CancellationPending == true)
                         {
-                            var stringCmd = "SELECT dbms_metadata.get_ddl('" +
-                                            Get_type(obj.OBJECT_TYPE).Replace(' ', '_') +
-                                            "', '" + obj.OBJECT_NAME + "') AS DDL, '" + obj.OBJECT_NAME +
-                                            "' as OBJECT_NAME, '" + obj.OBJECT_TYPE + "' as OBJECT_TYPE  FROM DUAL";
-                            Fill(stringCmd, _ddl);
-
-                            var ddl = (from d in _ddl
-                                select d).First();
-
-                            var path = _path + @"\" +
-                                       (ddl.OBJECT_TYPE == "PACKAGE BODY" ? "PACKAGE" : ddl.OBJECT_TYPE) + @"S\";
-                            Directory.CreateDirectory(path);
-                            path += ddl.OBJECT_NAME + get_object_file_type(ddl.OBJECT_TYPE);
-                            File.WriteAllText(path, ddl.DDL);
-                            progressBar_saving.Value++;
+                            e.Cancel = true;
+                            break;
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            if (
-                                MessageBox.Show(
-                                    "Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME +
-                                    "]. Continue?", @"Error", MessageBoxButtons.YesNo,
-                                    MessageBoxIcon.Warning) == DialogResult.No)
+                            try
                             {
-                                MessageBox.Show(
-                                    "Message: " + ex.Message,
-                                    @"Error:" + "[" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
-                                button_control_connect(false);
-                                return;
+                                var stringCmd = "SELECT dbms_metadata.get_ddl('" +
+                                                Get_type(obj.OBJECT_TYPE).Replace(' ', '_') +
+                                                "', '" + obj.OBJECT_NAME + "') AS DDL, '" + obj.OBJECT_NAME +
+                                                "' as OBJECT_NAME, '" + obj.OBJECT_TYPE + "' as OBJECT_TYPE  FROM DUAL";
+                                _con.GetQueryResult(stringCmd, _ddl);
+                                var ddl = (from d in _ddl
+                                    select d).First();
+
+                                var path = _path + @"\" +
+                                           (ddl.OBJECT_TYPE == "PACKAGE BODY" ? "PACKAGE" : ddl.OBJECT_TYPE) + @"S\";
+                                Directory.CreateDirectory(path);
+                                path += ddl.OBJECT_NAME + get_object_file_type(ddl.OBJECT_TYPE);
+                                File.WriteAllText(path, ddl.DDL);
+                                progress += step;
+                                backgroundWorker1.ReportProgress((int) (Math.Round(progress)));
+                            }
+                            catch (Exception ex)
+                            {
+                                if (
+                                    MessageBox.Show(
+                                        "Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME +
+                                        "]. Continue?", @"Error", MessageBoxButtons.YesNo,
+                                        MessageBoxIcon.Warning) == DialogResult.No)
+                                {
+                                    MessageBox.Show(
+                                        "Message: " + ex.Message,
+                                        @"Error:" + "[" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error);
+                                    button_control_connect(false);
+                                    return;
+                                }
                             }
                         }
                     }
                 }
 
-                MessageBox.Show(@"Scripts saved", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 button_control_connect(false);
                 MessageBox.Show(ex.ToString(), @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                progressBar_saving.Value = 0;
-                progressBar_saving.Visible = false;
             }
         }
 
@@ -387,7 +360,7 @@ namespace DBSource
 
         private void editExportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private static string get_object_file_type(string objTypeName)
@@ -424,14 +397,98 @@ namespace DBSource
 
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://www.oracle.com/index.html");
-        }
-
         private void pictureBox2_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://temabit.com/");
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender,
+            System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            button_GetSource_Stop.Enabled = false;
+            button_getSource.Text = "Start";
+            button_getSource.Enabled = true;
+
+            string resultText;
+            var messageIcon = MessageBoxIcon.Information;
+
+            if (e.Cancelled == true)
+            {
+                resultText = "Canceled!";
+            }
+            else if (e.Error != null)
+            {
+                resultText = "Error: " + e.Error.Message;
+                messageIcon = MessageBoxIcon.Error;
+            }
+            else
+            {
+                resultText = "Done!";
+            }
+
+            MessageBox.Show(resultText, Text, MessageBoxButtons.OK, messageIcon);
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            button_getSource.Text = (e.ProgressPercentage.ToString() + "%");
+        }
+
+        private void button_GetSource_Stop_Click(object sender, EventArgs e)
+        {
+            if (backgroundWorker1.WorkerSupportsCancellation == true)
+            {
+                // Cancel the asynchronous operation.
+                backgroundWorker1.CancelAsync();
+            }
+        }
+
+        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            var chList = new CheckedListBox();
+            
+            switch (_backgroundWorkerTaskId)
+            {
+                case 1:
+                    //fill_checkedListBox_objectTypes
+                    foreach (var obj in _objectTypes)
+                    {
+                        chList.Items.Add(obj.NAME);
+                    }
+
+                    break;
+                case 2:
+                    //fill_checkedListBox_objects()
+                    foreach (var obj in _objects)
+                    {
+                        chList.Items.Add(obj.NAME);
+                    }
+
+                    break;
+            }
+
+            e.Result = chList;
+        }
+
+        private void backgroundWorker2_RunWorkerCompleted(object sender,
+            System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            var items = (e.Result as CheckedListBox).Items;
+            switch (_backgroundWorkerTaskId)
+            {
+                case 1:
+                    //fill_checkedListBox_objectTypes
+                    checkedListBox_objectTypes.Items.Clear();
+                    checkedListBox_objectTypes.Items.AddRange(items);
+                    checkedListBox_objectTypes.Refresh();
+                    break;
+                case 2:
+                    //fill_checkedListBox_objects()
+                    checkedListBox_objects.Items.Clear();
+                    checkedListBox_objects.Items.AddRange(items);
+                    checkedListBox_objects.Refresh();
+                    break;
+            }
         }
     }
 }

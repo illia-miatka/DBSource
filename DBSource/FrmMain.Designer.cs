@@ -34,7 +34,6 @@
             this.checkedListBox_objectTypes = new System.Windows.Forms.CheckedListBox();
             this.label_objectTypes = new System.Windows.Forms.Label();
             this.button_disconnect = new System.Windows.Forms.Button();
-            this.progressBar_connect = new System.Windows.Forms.ProgressBar();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.connectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,9 +49,11 @@
             this.checkBox_currentSchema = new System.Windows.Forms.CheckBox();
             this.checkBox_LoadMode = new System.Windows.Forms.CheckBox();
             this.button_getSource = new System.Windows.Forms.Button();
-            this.progressBar_saving = new System.Windows.Forms.ProgressBar();
             this.checkBox_loadAll = new System.Windows.Forms.CheckBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.button_GetSource_Stop = new System.Windows.Forms.Button();
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -103,16 +104,6 @@
             this.button_disconnect.Text = "Disconnect";
             this.button_disconnect.UseVisualStyleBackColor = true;
             this.button_disconnect.Click += new System.EventHandler(this.button_disconnect_Click);
-            // 
-            // progressBar_connect
-            // 
-            this.progressBar_connect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar_connect.Location = new System.Drawing.Point(0, 27);
-            this.progressBar_connect.Maximum = 6;
-            this.progressBar_connect.Name = "progressBar_connect";
-            this.progressBar_connect.Size = new System.Drawing.Size(800, 16);
-            this.progressBar_connect.TabIndex = 37;
             // 
             // menuStrip1
             // 
@@ -257,22 +248,11 @@
             this.button_getSource.Enabled = false;
             this.button_getSource.Location = new System.Drawing.Point(662, 228);
             this.button_getSource.Name = "button_getSource";
-            this.button_getSource.Size = new System.Drawing.Size(128, 110);
+            this.button_getSource.Size = new System.Drawing.Size(128, 81);
             this.button_getSource.TabIndex = 47;
             this.button_getSource.Text = "Start";
             this.button_getSource.UseVisualStyleBackColor = true;
             this.button_getSource.Click += new System.EventHandler(this.button_getSource_Click);
-            // 
-            // progressBar_saving
-            // 
-            this.progressBar_saving.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar_saving.Location = new System.Drawing.Point(0, 518);
-            this.progressBar_saving.Maximum = 6;
-            this.progressBar_saving.Name = "progressBar_saving";
-            this.progressBar_saving.Size = new System.Drawing.Size(800, 20);
-            this.progressBar_saving.TabIndex = 48;
-            this.progressBar_saving.Visible = false;
             // 
             // checkBox_loadAll
             // 
@@ -291,7 +271,7 @@
             // 
             this.pictureBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox2.Image = global::DBSource.Properties.Resources.temabit;
-            this.pictureBox2.Location = new System.Drawing.Point(654, 46);
+            this.pictureBox2.Location = new System.Drawing.Point(654, 27);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(146, 46);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -299,14 +279,41 @@
             this.pictureBox2.TabStop = false;
             this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.WorkerReportsProgress = true;
+            this.backgroundWorker1.WorkerSupportsCancellation = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.backgroundWorker1_ProgressChanged);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
+            // button_GetSource_Stop
+            // 
+            this.button_GetSource_Stop.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button_GetSource_Stop.Enabled = false;
+            this.button_GetSource_Stop.Location = new System.Drawing.Point(662, 315);
+            this.button_GetSource_Stop.Name = "button_GetSource_Stop";
+            this.button_GetSource_Stop.Size = new System.Drawing.Size(128, 25);
+            this.button_GetSource_Stop.TabIndex = 52;
+            this.button_GetSource_Stop.Text = "Stop";
+            this.button_GetSource_Stop.UseVisualStyleBackColor = true;
+            this.button_GetSource_Stop.Click += new System.EventHandler(this.button_GetSource_Stop_Click);
+            // 
+            // backgroundWorker2
+            // 
+            this.backgroundWorker2.WorkerReportsProgress = true;
+            this.backgroundWorker2.WorkerSupportsCancellation = true;
+            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
+            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 550);
+            this.Controls.Add(this.button_GetSource_Stop);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.checkBox_loadAll);
-            this.Controls.Add(this.progressBar_saving);
             this.Controls.Add(this.button_getSource);
             this.Controls.Add(this.checkBox_LoadMode);
             this.Controls.Add(this.checkBox_currentSchema);
@@ -315,7 +322,6 @@
             this.Controls.Add(this.label_objects);
             this.Controls.Add(this.checkedListBox_objects);
             this.Controls.Add(this.label_connection);
-            this.Controls.Add(this.progressBar_connect);
             this.Controls.Add(this.button_disconnect);
             this.Controls.Add(this.label_objectTypes);
             this.Controls.Add(this.checkedListBox_objectTypes);
@@ -343,7 +349,6 @@
         private System.Windows.Forms.CheckedListBox checkedListBox_objectTypes;
         private System.Windows.Forms.Label label_objectTypes;
         private System.Windows.Forms.Button button_disconnect;
-        private System.Windows.Forms.ProgressBar progressBar_connect;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem connectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
@@ -359,9 +364,11 @@
         private System.Windows.Forms.Button button_getSource;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editExportToolStripMenuItem;
-        private System.Windows.Forms.ProgressBar progressBar_saving;
         private System.Windows.Forms.CheckBox checkBox_loadAll;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.Button button_GetSource_Stop;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
     }
 }
 
