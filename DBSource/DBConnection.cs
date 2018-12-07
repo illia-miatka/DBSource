@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace DBSource
 {
-    class DBConnection
+    internal class DBConnection
     {
         //Connection
         private OracleConnection _connection;
@@ -15,33 +15,37 @@ namespace DBSource
         private readonly string _tns;
         private readonly string _user;
         private readonly string _password;
+
         private readonly bool _isDirect;
+
         //Direct Connection Params
         private readonly string _protocol;
         private readonly string _host;
         private readonly int _port;
         private readonly string _sid;
 
-        public DBConnection(string User, string Password, string TNS)
+        public DBConnection(string user, string password, string tns)
         {
-            this._tns = TNS;
-            this._user = User;
-            this._password = Password;
+            _tns = tns;
+            _user = user;
+            _password = password;
 
             InitializeConnection();
         }
-        public DBConnection(string User, string Password, string Protocol, string Host, int Port, string SID)
+
+        public DBConnection(string user, string password, string protocol, string host, int port, string sid)
         {
-            this._user = User;
-            this._password = Password;
-            this._protocol = Protocol;
-            this._host = Host;
-            this._port = Port;
-            this._sid = SID;
+            _user = user;
+            _password = password;
+            _protocol = protocol;
+            _host = host;
+            _port = port;
+            _sid = sid;
             _isDirect = true;
 
             InitializeConnection();
         }
+
         public void InitializeConnection()
         {
             //string ConString = "Data Source=DATASOURCE;User Id=USERNAME;Password=PWD; ";
@@ -84,8 +88,8 @@ namespace DBSource
 
         public void Close()
         {
-            if(State() != ConnectionState.Closed)
-            _connection.Close();
+            if (State() != ConnectionState.Closed)
+                _connection.Close();
         }
 
         public ConnectionState State()

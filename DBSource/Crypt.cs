@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace DBSource
 {
-    static class Crypt
+    internal static class Crypt
     {
-        static readonly string PasswordHash = "$%^____ILUSH@_MOL0DE41K";
-        static readonly string SaltKey = "()&_________KUSH@L_OGURE41K_";
-        static readonly string VIKey = "@1B2c3D4e5F6g7H8";
+        private const string PasswordHash = "$%^____ILUSH@_MOL0DE41K";
+        private const string SaltKey = "()&_________KUSH@L_OGURE41K_";
+        private const string VIKey = "@1B2c3D4e5F6g7H8";
+
         public static string Encrypt(string plainText)
         {
             byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);

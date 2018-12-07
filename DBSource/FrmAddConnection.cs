@@ -10,7 +10,7 @@ namespace DBSource
         public DataSet.ConnectionListDataTable ConnectionList;
         private readonly bool _isEditMode;
 
-        public FrmAddConnection(bool isEditMode=false, string name = "Connection")
+        public FrmAddConnection(bool isEditMode = false, string name = "Connection")
         {
             InitializeComponent();
             _isEditMode = isEditMode;
@@ -27,7 +27,7 @@ namespace DBSource
             if (_isEditMode)
             {
                 var query = ConnectionList.AsEnumerable().Where(r => r.Field<string>("Name") == textBox_Name.Text);
-                foreach (DataSet.ConnectionListRow r in query.ToList())
+                foreach (var r in query.ToList())
                 {
                     r.Delete();
                 }
@@ -40,7 +40,8 @@ namespace DBSource
                     select connection.Name).ToList().Count;
                 if (chk > 0)
                 {
-                    MessageBox.Show(@"Уже существует подключение с таким именем", @"Внимание", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(@"Уже существует подключение с таким именем", @"Внимание", MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -60,9 +61,10 @@ namespace DBSource
             {
                 newRow.Protocol = textBox_Protocol.Text;
                 newRow.Host = textBox_Host.Text;
-                newRow.Port = (int)numericUpDown_Port.Value;
+                newRow.Port = (int) numericUpDown_Port.Value;
                 newRow.SID = textBox_SID.Text;
             }
+
             ConnectionList.AddConnectionListRow(newRow);
             Close();
         }
@@ -77,9 +79,9 @@ namespace DBSource
         {
             if (!_isEditMode) return;
             textBox_Name.Enabled = !_isEditMode;
-            DataSet.ConnectionListRow load = (from connection in ConnectionList
-                                              where connection.Name == textBox_Name.Text
-                                              select connection).First();
+            var load = (from connection in ConnectionList
+                where connection.Name == textBox_Name.Text
+                select connection).First();
             textBox_Name.Text = load.Name;
             checkBox_DC.Checked = load.IsDirect;
             textBox_User.Text = load.User;
@@ -97,11 +99,6 @@ namespace DBSource
                 textBox_TNS.Text = load.TNS;
 
             }
-        }
-
-        private void Frm_AddConnection_Load(object sender, EventArgs e)
-        {
-           
         }
 
         private void Frm_AddConnection_Shown(object sender, EventArgs e)

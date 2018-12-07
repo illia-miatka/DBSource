@@ -17,6 +17,7 @@
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -28,7 +29,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmAddConnection));
+            System.ComponentModel.ComponentResourceManager resources =
+                new System.ComponentModel.ComponentResourceManager(typeof(FrmAddConnection));
             this.button_Save = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.label_Name = new System.Windows.Forms.Label();
@@ -53,7 +55,7 @@
             this.textBox_path = new System.Windows.Forms.TextBox();
             this.button_path = new System.Windows.Forms.Button();
             this.panel_DC.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Port)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_Port)).BeginInit();
             this.SuspendLayout();
             // 
             // button_Save
@@ -124,11 +126,13 @@
             // numericUpDown_Port
             // 
             this.numericUpDown_Port.Location = new System.Drawing.Point(64, 55);
-            this.numericUpDown_Port.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
+            this.numericUpDown_Port.Maximum = new decimal(new int[]
+            {
+                9999,
+                0,
+                0,
+                0
+            });
             this.numericUpDown_Port.Name = "numericUpDown_Port";
             this.numericUpDown_Port.Size = new System.Drawing.Size(100, 20);
             this.numericUpDown_Port.TabIndex = 30;
@@ -285,15 +289,14 @@
             this.Controls.Add(this.textBox_Name);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_Save);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "FrmAddConnection";
             this.Text = "New connection";
-            this.Load += new System.EventHandler(this.Frm_AddConnection_Load);
             this.Shown += new System.EventHandler(this.Frm_AddConnection_Shown);
             this.panel_DC.ResumeLayout(false);
             this.panel_DC.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Port)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.numericUpDown_Port)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

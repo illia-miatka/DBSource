@@ -3,7 +3,6 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace DBSource
@@ -268,7 +267,6 @@ namespace DBSource
                 {
                     button_control_connect(false);
                     MessageBox.Show(ex.ToString());
-                    return;
                 }
             }
         }
@@ -276,7 +274,6 @@ namespace DBSource
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             double progress = 0;
-            double step;
 
             try
             {
@@ -290,7 +287,7 @@ namespace DBSource
                         query = (from obj in _objects
                             select obj);
 
-                    step = (double) 100 / query.Count();
+                    var step = (double) 100 / query.Count();
                     _ddl.Clear();
 
                     foreach (var obj in query)
@@ -329,8 +326,8 @@ namespace DBSource
                                         MessageBoxIcon.Warning) == DialogResult.No)
                                 {
                                     MessageBox.Show(
-                                        "Message: " + ex.Message,
-                                        @"Error:" + "[" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]",
+                                        @"Message: " + ex.Message,
+                                        @"Error:" + @"[" + obj.OBJECT_TYPE + @"].[" + obj.OBJECT_NAME + @"]",
                                         MessageBoxButtons.OK,
                                         MessageBoxIcon.Error);
                                     button_control_connect(false);
@@ -431,7 +428,7 @@ namespace DBSource
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            button_getSource.Text = (e.ProgressPercentage.ToString() + "%");
+            button_getSource.Text = (e.ProgressPercentage.ToString() + @"%");
         }
 
         private void button_GetSource_Stop_Click(object sender, EventArgs e)
@@ -446,7 +443,6 @@ namespace DBSource
         private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             var chList = new CheckedListBox();
-            
             switch (_backgroundWorkerTaskId)
             {
                 case 1:

@@ -27,9 +27,16 @@ namespace DBSource
                 StartPosition = FormStartPosition.CenterScreen,
                 MaximizeBox = false
             };
-            var textLabel = new Label() { Left = 50, Top = 20, Text = text };
-            var textBox = new TextBox() { Left = 50, Top = 40, Width = 400, Text = textbox };
-            var confirmation = new Button() { Text = @"OK", Left = 200, Width = 100, Top = 70, DialogResult = DialogResult.OK };
+            var textLabel = new Label() {Left = 50, Top = 20, Text = text};
+            var textBox = new TextBox() {Left = 50, Top = 40, Width = 400, Text = textbox};
+            var confirmation = new Button()
+            {
+                Text = @"OK",
+                Left = 200,
+                Width = 100,
+                Top = 70,
+                DialogResult = DialogResult.OK
+            };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(textBox);
             prompt.Controls.Add(confirmation);
