@@ -233,9 +233,19 @@ namespace DBSource.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap oracle {
+        internal static System.Drawing.Bitmap MSSQL {
             get {
-                object obj = ResourceManager.GetObject("oracle", resourceCulture);
+                object obj = ResourceManager.GetObject("MSSQL", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Oracle {
+            get {
+                object obj = ResourceManager.GetObject("Oracle", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
