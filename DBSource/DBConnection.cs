@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.OracleClient;
 using System.Windows.Forms;
@@ -6,7 +7,7 @@ using System.Windows.Forms;
 
 namespace DBSource
 {
-    internal class DBConnection
+    internal class DbConnectionOracle : DbConnection //: Program.IConnection
     {
         //Connection
         private OracleConnection _connection;
@@ -21,10 +22,41 @@ namespace DBSource
         //Direct Connection Params
         private readonly string _protocol;
         private readonly string _host;
-        private readonly int _port;
+        private readonly string _port;
         private readonly string _sid;
 
-        public DBConnection(string user, string password, string tns)
+        public DbConnectionOracle(string type, Dictionary<string,string> par) 
+        {
+            try
+            {
+                _user = par["user"];
+                _password = par["password"];
+
+                switch (type)
+                {
+                    case "direct":
+                        _protocol = par["protocol"];
+                        _host = par["host"];
+                        _port = par["port"];
+                        _sid = par["sid"];
+                        _isDirect = true;
+                        break;
+                    case "notdirect":
+                    default:
+                        _tns = par["tns"];
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            InitializeConnection();
+        }
+
+        public DbConnectionOracle(string user, string password, string tns)
         {
             _tns = tns;
             _user = user;
@@ -33,20 +65,20 @@ namespace DBSource
             InitializeConnection();
         }
 
-        public DBConnection(string user, string password, string protocol, string host, int port, string sid)
+        public DbConnectionOracle(string user, string password, string protocol, string host, int port, string sid)
         {
             _user = user;
             _password = password;
             _protocol = protocol;
             _host = host;
-            _port = port;
+            _port = port.ToString();
             _sid = sid;
             _isDirect = true;
 
             InitializeConnection();
         }
 
-        public void InitializeConnection()
+        private void InitializeConnection()
         {
             //string ConString = "Data Source=DATASOURCE;User Id=USERNAME;Password=PWD; ";
             string conString;
@@ -68,7 +100,7 @@ namespace DBSource
             _connection = new OracleConnection(conString);
         }
 
-        public bool GetQueryResult(string query, DataTable dt, bool clear = true)
+        public override bool GetQueryResult(string query, DataTable dt, bool clear = true)
         {
             try
             {
@@ -86,16 +118,15 @@ namespace DBSource
             return true;
         }
 
-        public void Close()
+        public override void Close()
         {
             if (State() != ConnectionState.Closed)
                 _connection.Close();
         }
 
-        public ConnectionState State()
+        public override ConnectionState State()
         {
             return _connection.State;
         }
-
     }
 }

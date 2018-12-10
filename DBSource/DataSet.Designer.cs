@@ -406,6 +406,10 @@ namespace DBSource {
             
             private global::System.Data.DataColumn columnPath;
             
+            private global::System.Data.DataColumn columnServer;
+            
+            private global::System.Data.DataColumn columnWinLogin;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public ConnectionListDataTable() {
@@ -529,6 +533,22 @@ namespace DBSource {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn ServerColumn {
+                get {
+                    return this.columnServer;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn WinLoginColumn {
+                get {
+                    return this.columnWinLogin;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -564,7 +584,7 @@ namespace DBSource {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public ConnectionListRow AddConnectionListRow(string Name, string Protocol, string Host, int Port, string SID, string User, string Password, string Type, string TNS, bool IsDirect, string Path) {
+            public ConnectionListRow AddConnectionListRow(string Name, string Protocol, string Host, int Port, string SID, string User, string Password, string Type, string TNS, bool IsDirect, string Path, string Server, bool WinLogin) {
                 ConnectionListRow rowConnectionListRow = ((ConnectionListRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Name,
@@ -577,7 +597,9 @@ namespace DBSource {
                         Type,
                         TNS,
                         IsDirect,
-                        Path};
+                        Path,
+                        Server,
+                        WinLogin};
                 rowConnectionListRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowConnectionListRow);
                 return rowConnectionListRow;
@@ -611,6 +633,8 @@ namespace DBSource {
                 this.columnTNS = base.Columns["TNS"];
                 this.columnIsDirect = base.Columns["IsDirect"];
                 this.columnPath = base.Columns["Path"];
+                this.columnServer = base.Columns["Server"];
+                this.columnWinLogin = base.Columns["WinLogin"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -638,6 +662,10 @@ namespace DBSource {
                 base.Columns.Add(this.columnIsDirect);
                 this.columnPath = new global::System.Data.DataColumn("Path", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnPath);
+                this.columnServer = new global::System.Data.DataColumn("Server", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnServer);
+                this.columnWinLogin = new global::System.Data.DataColumn("WinLogin", typeof(bool), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnWinLogin);
                 this.columnIsDirect.DefaultValue = ((bool)(true));
                 this.columnPath.DefaultValue = ((string)("C:\\\\"));
             }
@@ -1755,6 +1783,38 @@ namespace DBSource {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public string Server {
+                get {
+                    try {
+                        return ((string)(this[this.tableConnectionList.ServerColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'Server\' in table \'ConnectionList\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableConnectionList.ServerColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool WinLogin {
+                get {
+                    try {
+                        return ((bool)(this[this.tableConnectionList.WinLoginColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("The value for column \'WinLogin\' in table \'ConnectionList\' is DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tableConnectionList.WinLoginColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public bool IsNameNull() {
                 return this.IsNull(this.tableConnectionList.NameColumn);
             }
@@ -1883,6 +1943,30 @@ namespace DBSource {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public void SetPathNull() {
                 this[this.tableConnectionList.PathColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool IsServerNull() {
+                return this.IsNull(this.tableConnectionList.ServerColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public void SetServerNull() {
+                this[this.tableConnectionList.ServerColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool IsWinLoginNull() {
+                return this.IsNull(this.tableConnectionList.WinLoginColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public void SetWinLoginNull() {
+                this[this.tableConnectionList.WinLoginColumn] = global::System.Convert.DBNull;
             }
         }
         

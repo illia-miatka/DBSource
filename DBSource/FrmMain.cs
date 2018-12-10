@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -13,7 +14,7 @@ namespace DBSource
         private readonly DataSet.DbObjectTypesDataTable _objectTypes = new DataSet.DbObjectTypesDataTable();
         private readonly DataSet.DbObjectsDataTable _objects = new DataSet.DbObjectsDataTable();
         private readonly DataSet.OBJDataTable _ddl = new DataSet.OBJDataTable();
-        private DBConnection _con;
+        private DbConnection _con;
         private string _filterObjects = "";
         private string _path = "";
         private int _backgroundWorkerTaskId;
@@ -38,15 +39,27 @@ namespace DBSource
 
             _path = row.Path;
 
+            var par = new Dictionary<string, string>();
+            string type = "notdirect";
+
             if (row.IsDirect)
             {
-                _con = new DBConnection(row.User, Crypt.Decrypt(row.Password), row.Protocol, row.Host,
-                    row.Port, row.SID);
+                par.Add("user", row.User);
+                par.Add("password", Crypt.Decrypt(row.Password));
+                par.Add("protocol", row.Protocol);
+                par.Add("host", row.Host);
+                par.Add("port", row.Port.ToString());
+                par.Add("sid", row.SID);
+                type = "direct";
             }
             else
             {
-                _con = new DBConnection(row.User, Crypt.Decrypt(row.Password), row.TNS);
+                par.Add("user", row.User);
+                par.Add("password", Crypt.Decrypt(row.Password));
+                par.Add("tns", row.TNS);
             }
+
+            _con = new DbConnectionOracle(type, par);
 
             button_control_connect(true);
 
