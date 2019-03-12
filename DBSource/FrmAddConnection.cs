@@ -24,6 +24,9 @@ namespace DBSource
 
         private void button_Save_Click(object sender, EventArgs e)
         {
+            if(!Helpers.CheckPath(textBox_path.Text))
+                return;
+
             if (_isEditMode)
             {
                 var query = ConnectionList.AsEnumerable().Where(r => r.Field<string>("Name") == textBox_Name.Text);

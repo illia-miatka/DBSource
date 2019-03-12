@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using DevExpress.Data.PLinq.Helpers;
 
 namespace DBSource
 {
@@ -13,7 +14,6 @@ namespace DBSource
         private readonly DataSet.ConnectionListDataTable _connectionList = new DataSet.ConnectionListDataTable();
         private readonly DataSet.DbObjectTypesDataTable _objectTypes = new DataSet.DbObjectTypesDataTable();
         private readonly DataSet.DbObjectsDataTable _objects = new DataSet.DbObjectsDataTable();
-        private readonly DataSet.OBJDataTable _ddl = new DataSet.OBJDataTable();
         private DbConnection _con;
         private string _filterObjects = "";
         private string _path = "";
@@ -40,33 +40,54 @@ namespace DBSource
             _path = row.Path;
 
             var par = new Dictionary<string, string>();
-            string type = "notdirect";
+            var type = "";
 
-            if (row.IsDirect)
+            if (row.Type == "Oracle")
             {
-                par.Add("user", row.User);
-                par.Add("password", Crypt.Decrypt(row.Password));
-                par.Add("protocol", row.Protocol);
-                par.Add("host", row.Host);
-                par.Add("port", row.Port.ToString());
-                par.Add("sid", row.SID);
-                type = "direct";
+                if (row.IsDirect)
+                {
+                    par.Add("user", row.User);
+                    par.Add("password", Crypt.Decrypt(row.Password));
+                    par.Add("protocol", row.Protocol);
+                    par.Add("host", row.Host);
+                    par.Add("port", row.Port.ToString());
+                    par.Add("sid", row.SID);
+                    type = "direct";
+                }
+                else
+                {
+                    par.Add("user", row.User);
+                    par.Add("password", Crypt.Decrypt(row.Password));
+                    par.Add("tns", row.TNS);
+                    type = "notdirect";
+                }
+
+                _con = new DbConnectionOracle(type, par);
             }
-            else
+       
+            if (row.Type == "MSSQL")
             {
-                par.Add("user", row.User);
-                par.Add("password", Crypt.Decrypt(row.Password));
-                par.Add("tns", row.TNS);
+
+                if (row.WinLogin)
+                {
+                    par.Add("server", row.Server);
+                    type = "direct";
+                }
+                else
+                {
+                    par.Add("server", row.Server);
+                    par.Add("user", row.User);
+                    par.Add("password", Crypt.Decrypt(row.Password));
+                    type = "notdirect";
+                }
+                _con = new DBConnectionMSSQl(type, par);
+                if (_con.State() != ConnectionState.Open)
+                    return;
             }
-
-            _con = new DbConnectionOracle(type, par);
-
+            
             button_control_connect(true);
 
-            var stringCmd = "SELECT DISTINCT OBJECT_TYPE AS NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE<>'LOB' " +
-                            "UNION " +
-                            "SELECT DISTINCT OBJECT_TYPE FROM USER_OBJECTS WHERE OBJECT_TYPE<>'LOB' ";
-            _con.GetQueryResult(stringCmd, _objectTypes);
+            _con.GetDBObjectTypes(_objectTypes);
 
             _backgroundWorkerTaskId = 1;
             backgroundWorker2.RunWorkerAsync();
@@ -190,36 +211,8 @@ namespace DBSource
             {
                 button_control_connect(true);
                 {
-                    string stringCmd =
-                        "SELECT DISTINCT '[' || OBJECT_TYPE || ']' || OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
-                        "FROM ( " +
-                        "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
-                        "FROM ALL_OBJECTS ";
-                    if (checkBox_currentSchema.Checked)
-                    {
-                        stringCmd += "WHERE OWNER = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') ";
-                    }
-
-                    stringCmd += "UNION " +
-                                 "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
-                                 "FROM USER_OBJECTS" +
-                                 ") t " +
-                                 "WHERE OBJECT_TYPE IN(";
-
-                    if (checkedListBox_objectTypes.CheckedItems.Count == 1)
-                        stringCmd = stringCmd.Replace("'[' || OBJECT_TYPE || ']' ||", "");
-
-                    foreach (var type in checkedListBox_objectTypes.CheckedItems)
-                    {
-                        stringCmd += "'" + type + "',";
-                    }
-
-                    stringCmd = stringCmd.Remove(stringCmd.Length - 1);
-                    stringCmd += ") ";
-                    stringCmd += _filterObjects != "" ? "AND OBJECT_NAME LIKE ('%" + _filterObjects + "%') " : "";
-                    stringCmd += "ORDER BY 1";
-
-                    _con.GetQueryResult(stringCmd, _objects);
+                   _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked, 
+                       checkedListBox_objectTypes.CheckedItems.OfType<string>().ToList());
                     _backgroundWorkerTaskId = 2;
                     backgroundWorker2.RunWorkerAsync();
                 }
@@ -260,26 +253,18 @@ namespace DBSource
                 try
                 {
                     button_control_connect(true);
-                    {
-                        var stringCmd = "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE "
-                                        + "FROM ALL_OBJECTS ";
-                        if (checkBox_currentSchema.Checked)
-                        {
-                            stringCmd += "WHERE OWNER=SYS_CONTEXT('USERENV','CURRENT_SCHEMA') AND OBJECT_TYPE<>'LOB' " +
-                                         "AND SUBSTR(OBJECT_NAME,1,4) <> 'SYS_'";
-                        }
-
-                        stringCmd += "UNION " +
-                                     "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
-                                     "FROM  USER_OBJECTS " +
-                                     "WHERE OBJECT_TYPE<>'LOB' AND SUBSTR(OBJECT_NAME,1,4) <> 'SYS_'";
-                        _con.GetQueryResult(stringCmd, _objects);
-                    }
+                    button_getSource.Text = "Load Objects";
+                    Application.DoEvents();
+                    _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked);
                 }
                 catch (Exception ex)
                 {
                     button_control_connect(false);
                     MessageBox.Show(ex.ToString());
+                }
+                finally
+                {
+                    button_getSource.Text = "Start";
                 }
             }
         }
@@ -301,7 +286,6 @@ namespace DBSource
                             select obj);
 
                     var step = (double) 100 / query.Count();
-                    _ddl.Clear();
 
                     foreach (var obj in query)
                     {
@@ -314,19 +298,14 @@ namespace DBSource
                         {
                             try
                             {
-                                var stringCmd = "SELECT dbms_metadata.get_ddl('" +
-                                                Get_type(obj.OBJECT_TYPE).Replace(' ', '_') +
-                                                "', '" + obj.OBJECT_NAME + "') AS DDL, '" + obj.OBJECT_NAME +
-                                                "' as OBJECT_NAME, '" + obj.OBJECT_TYPE + "' as OBJECT_TYPE  FROM DUAL";
-                                _con.GetQueryResult(stringCmd, _ddl);
-                                var ddl = (from d in _ddl
-                                    select d).First();
+                                
+                                var path = _path + _con.GetPath(obj.OBJECT_TYPE, obj.NAME);
+                                var ddl = _con.GetDDL(obj);
+                                var fileName = _con.GetFileName(obj.OBJECT_TYPE, obj.NAME);
+                                if (!Directory.Exists(path))
+                                    Directory.CreateDirectory(path);
+                                File.WriteAllText(path + Helpers.CheckForIllegalChar(fileName), ddl);
 
-                                var path = _path + @"\" +
-                                           (ddl.OBJECT_TYPE == "PACKAGE BODY" ? "PACKAGE" : ddl.OBJECT_TYPE) + @"S\";
-                                Directory.CreateDirectory(path);
-                                path += ddl.OBJECT_NAME + get_object_file_type(ddl.OBJECT_TYPE);
-                                File.WriteAllText(path, ddl.DDL);
                                 progress += step;
                                 backgroundWorker1.ReportProgress((int) (Math.Round(progress)));
                             }
@@ -359,46 +338,7 @@ namespace DBSource
             }
         }
 
-        private static string Get_type(string objectType)
-        {
-            if (objectType == "PACKAGE") objectType = "PACKAGE_SPEC";
-            if (objectType == "JOB" || objectType == "SCHEDULE") objectType = "PROCOBJ";
-            if (objectType == "LOB") objectType = "TABLE";
-            if (objectType == "DATABASE LINK") objectType = "DB_LINK";
-            return objectType;
-        }
-
-        private void editExportToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private static string get_object_file_type(string objTypeName)
-        {
-            var val = ".sql";
-            switch (objTypeName)
-            {
-                case "PROCEDURE":
-                    val = ".prc";
-                    break;
-                case "VIEW":
-                    val = ".vw";
-                    break;
-                case "PACKAGE_SPEC":
-                case "PACKAGE":
-                    val = ".pks";
-                    break;
-                case "PACKAGE BODY":
-                    val = ".pkb";
-                    break;
-                case "TRIGGER":
-                    val = ".trg";
-                    break;
-            }
-
-            return val;
-        }
-
+        
         private void checkBox_loadAll_CheckedChanged(object sender, EventArgs e)
         {
             checkedListBox_objectTypes.Enabled = !checkBox_loadAll.Checked;

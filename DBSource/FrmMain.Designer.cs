@@ -160,7 +160,6 @@
             this.editExportToolStripMenuItem.Name = "editExportToolStripMenuItem";
             this.editExportToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
             this.editExportToolStripMenuItem.Text = "Edit Export";
-            this.editExportToolStripMenuItem.Click += new System.EventHandler(this.editExportToolStripMenuItem_Click);
             // 
             // label_connection
             // 

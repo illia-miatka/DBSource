@@ -24,12 +24,23 @@ namespace DBSource
         protected DbConnection(string type, Dictionary<string, string> par)
         {
         }
+
         protected DbConnection()
         {
         }
-
-        public abstract bool GetQueryResult(string query, DataTable dt, bool clear = true);
         public abstract void Close();
         public abstract ConnectionState State();
+        public abstract void GetDBObjectTypes(DataTable ds);
+
+        public abstract void GetDBObjectNames(DataTable dt, string filterObjects,
+            bool currentSchema, List<string> objectTypes = null);
+
+        public abstract string GetDDL(DataSet.DbObjectsRow obj);
+
+        public abstract string GetPath(string Type, string Name);
+        public abstract string GetFileName(string Type, string Name);
+
     }
+
+    
 }
