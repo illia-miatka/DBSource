@@ -131,7 +131,7 @@ namespace DBSource
                     textBox_Server_MS.Text = load.Server;
                     if (checkBox_WinLog_MS.Checked) return;
                     textBox_User_MS.Text = load.User;
-                    textBox_Password_MS.Text = load.Password;
+                    textBox_Password_MS.Text = Crypt.Decrypt(load.Password);
                     break;
             }
         }
