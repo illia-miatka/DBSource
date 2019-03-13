@@ -20,6 +20,7 @@ namespace DBSource
         private readonly DataSet.DbObjectsDataTable _objects = new DataSet.DbObjectsDataTable();
         private DbConnection _con;
         private string _filterObjects = "";
+        private string _filterDate = "";
         private string _path = "";
         private bool _byFolders = false;
         private int _backgroundWorkerTaskId;
@@ -238,7 +239,7 @@ namespace DBSource
             {
                 button_control_connect(true);
                 {
-                   _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked, 
+                   _con.GetDBObjectNames(_objects, new Filter(_filterObjects,_filterDate), checkBox_currentSchema.Checked, 
                        checkedListBox_objectTypes.CheckedItems.OfType<string>().ToList());
                     _backgroundWorkerTaskId = 2;
                     backgroundWorker2.RunWorkerAsync();
@@ -344,8 +345,7 @@ namespace DBSource
                                 var ddl = _con.GetDDL(obj);
                                 if (ddl == "")
                                 {
-                                    var err = "Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]\n";
-                                    errors.Add(err);
+                                    return;
                                 }
 
                                 var fileName = _con.GetFileName(obj.OBJECT_TYPE, obj.NAME, !_byFolders);
@@ -528,7 +528,7 @@ namespace DBSource
 
         private void backgroundWorker3_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked);
+            _con.GetDBObjectNames(_objects, new Filter(_filterObjects, _filterDate) , checkBox_currentSchema.Checked);
         }
 
         private void backgroundWorker3_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -539,6 +539,12 @@ namespace DBSource
         private void buttonGIT_Click(object sender, EventArgs e)
         {
             GIT.GITCommit(_path, false);
+        }
+
+        private void button_addDateFilter_Click(object sender, EventArgs e)
+        {
+            _filterDate = Helpers.ShowDialog("Date", "Recent object changes from:", _filterDate=="" ? DateTime.Now.ToString("dd/MM/yyyy 00:00") : _filterDate, new DateTimePicker() { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy HH:mm" });
+            button_addDateFilter.BackColor = _filterDate == "" ? default(Color) : Color.LightBlue;                
         }
     }
 }

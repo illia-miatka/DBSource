@@ -40,7 +40,6 @@
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label_connection = new System.Windows.Forms.Label();
             this.checkedListBox_objects = new System.Windows.Forms.CheckedListBox();
             this.label_objects = new System.Windows.Forms.Label();
@@ -56,6 +55,7 @@
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
             this.buttonGIT = new System.Windows.Forms.Button();
+            this.button_addDateFilter = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -151,17 +151,9 @@
             // 
             // settingsToolStripMenuItem
             // 
-            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editExportToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.settingsToolStripMenuItem.Text = "Settings";
-            // 
-            // editExportToolStripMenuItem
-            // 
-            this.editExportToolStripMenuItem.Name = "editExportToolStripMenuItem";
-            this.editExportToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
-            this.editExportToolStripMenuItem.Text = "Edit Export";
             // 
             // label_connection
             // 
@@ -197,7 +189,7 @@
             this.button_loadObjects.Enabled = false;
             this.button_loadObjects.Location = new System.Drawing.Point(212, 315);
             this.button_loadObjects.Name = "button_loadObjects";
-            this.button_loadObjects.Size = new System.Drawing.Size(93, 23);
+            this.button_loadObjects.Size = new System.Drawing.Size(93, 50);
             this.button_loadObjects.TabIndex = 43;
             this.button_loadObjects.Text = "===>";
             this.button_loadObjects.UseVisualStyleBackColor = true;
@@ -206,11 +198,11 @@
             // button_addFilter
             // 
             this.button_addFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.button_addFilter.Location = new System.Drawing.Point(212, 286);
+            this.button_addFilter.Location = new System.Drawing.Point(211, 257);
             this.button_addFilter.Name = "button_addFilter";
             this.button_addFilter.Size = new System.Drawing.Size(93, 23);
             this.button_addFilter.TabIndex = 44;
-            this.button_addFilter.Text = "Filter";
+            this.button_addFilter.Text = "Name Filter";
             this.button_addFilter.UseVisualStyleBackColor = true;
             this.button_addFilter.Click += new System.EventHandler(this.button_addFilter_Click);
             // 
@@ -221,7 +213,7 @@
             this.checkBox_currentSchema.AutoSize = true;
             this.checkBox_currentSchema.Checked = true;
             this.checkBox_currentSchema.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_currentSchema.Location = new System.Drawing.Point(212, 257);
+            this.checkBox_currentSchema.Location = new System.Drawing.Point(211, 228);
             this.checkBox_currentSchema.Name = "checkBox_currentSchema";
             this.checkBox_currentSchema.Size = new System.Drawing.Size(93, 23);
             this.checkBox_currentSchema.TabIndex = 45;
@@ -260,7 +252,7 @@
             this.checkBox_loadAll.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.checkBox_loadAll.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBox_loadAll.AutoSize = true;
-            this.checkBox_loadAll.Location = new System.Drawing.Point(212, 228);
+            this.checkBox_loadAll.Location = new System.Drawing.Point(211, 199);
             this.checkBox_loadAll.Name = "checkBox_loadAll";
             this.checkBox_loadAll.Size = new System.Drawing.Size(94, 23);
             this.checkBox_loadAll.TabIndex = 49;
@@ -325,11 +317,23 @@
             this.buttonGIT.Visible = false;
             this.buttonGIT.Click += new System.EventHandler(this.buttonGIT_Click);
             // 
+            // button_addDateFilter
+            // 
+            this.button_addDateFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button_addDateFilter.Location = new System.Drawing.Point(212, 286);
+            this.button_addDateFilter.Name = "button_addDateFilter";
+            this.button_addDateFilter.Size = new System.Drawing.Size(93, 23);
+            this.button_addDateFilter.TabIndex = 54;
+            this.button_addDateFilter.Text = "Date Filter";
+            this.button_addDateFilter.UseVisualStyleBackColor = true;
+            this.button_addDateFilter.Click += new System.EventHandler(this.button_addDateFilter_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 550);
+            this.Controls.Add(this.button_addDateFilter);
             this.Controls.Add(this.buttonGIT);
             this.Controls.Add(this.button_GetSource_Stop);
             this.Controls.Add(this.pictureBox2);
@@ -383,7 +387,6 @@
         private System.Windows.Forms.CheckBox checkBox_LoadMode;
         private System.Windows.Forms.Button button_getSource;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem editExportToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox_loadAll;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
@@ -391,6 +394,7 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private System.ComponentModel.BackgroundWorker backgroundWorker3;
         private System.Windows.Forms.Button buttonGIT;
+        private System.Windows.Forms.Button button_addDateFilter;
     }
 }
 

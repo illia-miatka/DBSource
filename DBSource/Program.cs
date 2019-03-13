@@ -32,7 +32,7 @@ namespace DBSource
         public abstract ConnectionState State();
         public abstract void GetDBObjectTypes(DataTable ds);
 
-        public abstract void GetDBObjectNames(DataTable dt, string filterObjects,
+        public abstract void GetDBObjectNames(DataTable dt, Filter filter,
             bool currentSchema, List<string> objectTypes = null);
 
         public abstract string GetDDL(DataSet.DbObjectsRow obj);
@@ -42,5 +42,17 @@ namespace DBSource
 
     }
 
-    
+    public class Filter
+    {
+        public string Objects { get; }
+        public string Date { get; }
+
+        public Filter(string objects, string date)
+        {
+            Date = date;
+            Objects = objects;
+        }
+    }
+
+
 }

@@ -103,7 +103,7 @@ namespace DBSource
             return type;
         }
 
-        public override void GetDBObjectNames(DataTable dataTable, string filterObjects, bool currentSchema, List<string> objectTypes = null)
+        public override void GetDBObjectNames(DataTable dataTable, Filter filter, bool currentSchema, List<string> objectTypes = null)
         {
             dataTable.Clear();
             var dTab = new DataSet.DbObjectsDataTable();
@@ -129,7 +129,8 @@ namespace DBSource
                 var q = @"SELECT DB_NAME() + '.' + SCHEMA_NAME(schema_id) + '.' + name as FullName, name as Name ";
                 q += @" FROM sys.objects ";
                 q += @" WHERE type <> 'S' ";
-                q += filterObjects != "" ? @" and name like ('%" + filterObjects + @"%') " : "";
+                q += filter.Objects != "" ? @" and name like ('%" + filter.Objects + @"%') " : "";
+                q += filter.Date != "" ? @" and modify_date >= CAST(CONVERT(varchar,'" + filter.Date + @"',120) as datetime) " : "";
                 q +=
                     @" and type_desc in ('$type$') ";
                 q += @" and is_ms_shipped = 0 ";
@@ -137,7 +138,8 @@ namespace DBSource
                 q += @" SELECT DB_NAME() + '..' + name as FullName, name as Name  FROM sys.sysusers ";
                 q += @" WHERE gid=0 and sid is not null ";
                 q += @" and name not in ('dbo', 'public', 'guest') ";
-                q += filterObjects != "" ? @" and name like ('%" + filterObjects + @"%') " : "";
+                q += filter.Objects != "" ? @" and name like ('%" + filter.Objects + @"%') " : "";
+                q += filter.Date != "" ? @" and updatedate >= CAST(CONVERT(varchar,'" + filter.Date + @"',120) as datetime) " : "";
                 q += @" and 'User' in ('$type$')";
 
                 foreach (var type in objectTypes)

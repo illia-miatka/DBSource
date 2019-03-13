@@ -92,7 +92,7 @@ namespace DBSource
             }
         }
 
-        public static string ShowDialog(string text, string caption, string textbox = "")
+        public static string ShowDialog(string text, string caption, string textbox = "", Control inControl = null)
         {
             var prompt = new Form()
             {
@@ -104,22 +104,37 @@ namespace DBSource
                 MaximizeBox = false
             };
             var textLabel = new Label() { Left = 50, Top = 20, Text = text };
-            var textBox = new TextBox() { Left = 50, Top = 40, Width = 400, Text = textbox };
+            inControl = inControl ?? new TextBox();
+            inControl.Left = 50;
+            inControl.Top = 40;
+            inControl.Width = 400;
+            inControl.Text = textbox;
             var confirmation = new Button()
             {
                 Text = @"OK",
-                Left = 200,
+                Left = 130,
                 Width = 100,
                 Top = 70,
                 DialogResult = DialogResult.OK
             };
             confirmation.Click += (sender, e) => { prompt.Close(); };
-            prompt.Controls.Add(textBox);
+            var cancel = new Button()
+            {
+                Text = @"Cancel",
+                Left = 260,
+                Width = 100,
+                Top = 70,
+                DialogResult = DialogResult.Cancel
+            };
+            cancel.Click += (sender, e) => { prompt.Close(); };
+            prompt.Controls.Add(inControl);
             prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(cancel);
             prompt.Controls.Add(textLabel);
             prompt.AcceptButton = confirmation;
+            prompt.AcceptButton = cancel;
 
-            return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : "";
-        }        
+            return prompt.ShowDialog() == DialogResult.OK ? inControl.Text : "";
+        }
     }
 }

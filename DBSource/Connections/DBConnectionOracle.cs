@@ -17,6 +17,8 @@ namespace DBSource
         private readonly string _tns;
         private readonly string _user;
         private readonly string _password;
+        private string _currentSchema = "";
+        private string _instanceName = "";
 
         private readonly bool _isDirect;
 
@@ -104,6 +106,15 @@ namespace DBSource
             }
 
             _connection = new OracleConnection(conString);
+
+            var stringCmd =
+                @"select sys_context( 'userenv', 'current_schema' ) as current_schema, sys_context('userenv','instance_name') as instance_name from dual";
+            var dt = new DataTable();
+            if (GetQueryResult(stringCmd, dt))
+            {
+                _currentSchema = Convert.ToString(dt.Rows[0]["current_schema"]);
+                _instanceName = Convert.ToString(dt.Rows[0]["instance_name"]);
+            }
         }
 
         private bool GetQueryResult(string query, DataTable dt, bool clear = true)
@@ -140,14 +151,14 @@ namespace DBSource
             GetQueryResult(_cmdObjectType, dt);
         }
 
-        public override void GetDBObjectNames(DataTable dt, string filterObjects, bool currentSchema, List<string> objectTypes)
+        public override void GetDBObjectNames(DataTable dt, Filter filter, bool currentSchema, List<string> objectTypes)
         {
             dt.Clear();
 
             string stringCmd =
                 "SELECT DISTINCT '[' || OBJECT_TYPE || ']' || OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
                 "FROM ( " +
-                "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
+                "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE, LAST_DDL_TIME " +
                 "FROM ALL_OBJECTS ";
             if (currentSchema)
             {
@@ -155,7 +166,7 @@ namespace DBSource
             }
 
             stringCmd += "UNION " +
-                         "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
+                         "SELECT DISTINCT OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE, LAST_DDL_TIME " +
                          "FROM USER_OBJECTS" +
                          ") t  WHERE 1=1 ";
             if (objectTypes != null)
@@ -174,7 +185,8 @@ namespace DBSource
                 stringCmd += ") ";
             }
 
-            stringCmd += filterObjects != "" ? "AND OBJECT_NAME LIKE ('%" + filterObjects + "%') " : "";
+            stringCmd += filter.Objects != "" ? "AND OBJECT_NAME LIKE ('%" + filter.Objects + "%') " : "";
+            stringCmd += filter.Date != "" ? "AND LAST_DDL_TIME>=TO_DATE('" + filter.Date + "','DD/MM/YYYY HH24:MI') " : ""; //dd / MM / yyyy 00:00
             stringCmd += "ORDER BY 1";
 
             GetQueryResult(stringCmd, dt);
@@ -203,13 +215,16 @@ namespace DBSource
             var path = @"\";
             if (ByFolders)
             {
-                path += (Type == "PACKAGE BODY" ? "PACKAGE" : Type) + @"S\";
+                path += _instanceName + @"\";
+                path += _currentSchema + @"\";
+                path += (Type == "PACKAGE BODY" ? "PACKAGE" : (Type == "JOB" ? "SCHEDULER JOB" : Type)) + @"S\";
             }
             return path;
         }
 
         public override string GetFileName(string Type, string Name, bool WithType = false)
         {
+            Name = Name.Replace("[" + Type + "]", "");
             return Name + get_object_file_type(Type);
         }
 
