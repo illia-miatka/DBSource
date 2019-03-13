@@ -166,8 +166,9 @@
             // 
             // checkedListBox_objects
             // 
-            this.checkedListBox_objects.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkedListBox_objects.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.checkedListBox_objects.FormattingEnabled = true;
             this.checkedListBox_objects.Location = new System.Drawing.Point(308, 125);
             this.checkedListBox_objects.Name = "checkedListBox_objects";
@@ -222,6 +223,8 @@
             // 
             // checkBox_LoadMode
             // 
+            this.checkBox_LoadMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox_LoadMode.Appearance = System.Windows.Forms.Appearance.Button;
             this.checkBox_LoadMode.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.checkBox_LoadMode.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -237,7 +240,7 @@
             // 
             // button_getSource
             // 
-            this.button_getSource.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button_getSource.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.button_getSource.Enabled = false;
             this.button_getSource.Location = new System.Drawing.Point(662, 228);
             this.button_getSource.Name = "button_getSource";
@@ -282,7 +285,7 @@
             // 
             // button_GetSource_Stop
             // 
-            this.button_GetSource_Stop.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button_GetSource_Stop.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.button_GetSource_Stop.Enabled = false;
             this.button_GetSource_Stop.Location = new System.Drawing.Point(662, 315);
             this.button_GetSource_Stop.Name = "button_GetSource_Stop";
@@ -308,6 +311,7 @@
             // 
             // buttonGIT
             // 
+            this.buttonGIT.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.buttonGIT.Location = new System.Drawing.Point(662, 199);
             this.buttonGIT.Name = "buttonGIT";
             this.buttonGIT.Size = new System.Drawing.Size(126, 23);
@@ -354,6 +358,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.MinimumSize = new System.Drawing.Size(816, 588);
             this.Name = "FrmMain";
             this.Text = "DBSource";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Frm_Main_FormClosed);
