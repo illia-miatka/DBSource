@@ -65,6 +65,7 @@
             this.label_Server = new System.Windows.Forms.Label();
             this.textBox_Server_MS = new System.Windows.Forms.TextBox();
             this.checkBox_WinLog_MS = new System.Windows.Forms.CheckBox();
+            this.cbObjPath = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -86,6 +87,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.cbObjPath);
             this.splitContainer1.Panel1.Controls.Add(this.pictureBox1);
             this.splitContainer1.Panel1.Controls.Add(this.button_path);
             this.splitContainer1.Panel1.Controls.Add(this.label_path);
@@ -114,7 +116,7 @@
             // 
             // button_path
             // 
-            this.button_path.Location = new System.Drawing.Point(217, 59);
+            this.button_path.Location = new System.Drawing.Point(217, 34);
             this.button_path.Name = "button_path";
             this.button_path.Size = new System.Drawing.Size(23, 20);
             this.button_path.TabIndex = 74;
@@ -125,7 +127,7 @@
             // label_path
             // 
             this.label_path.AutoSize = true;
-            this.label_path.Location = new System.Drawing.Point(12, 63);
+            this.label_path.Location = new System.Drawing.Point(12, 38);
             this.label_path.Name = "label_path";
             this.label_path.Size = new System.Drawing.Size(29, 13);
             this.label_path.TabIndex = 73;
@@ -133,7 +135,7 @@
             // 
             // textBox_path
             // 
-            this.textBox_path.Location = new System.Drawing.Point(70, 60);
+            this.textBox_path.Location = new System.Drawing.Point(70, 35);
             this.textBox_path.Name = "textBox_path";
             this.textBox_path.Size = new System.Drawing.Size(155, 20);
             this.textBox_path.TabIndex = 72;
@@ -161,7 +163,7 @@
             // label_Name
             // 
             this.label_Name.AutoSize = true;
-            this.label_Name.Location = new System.Drawing.Point(12, 34);
+            this.label_Name.Location = new System.Drawing.Point(12, 9);
             this.label_Name.Name = "label_Name";
             this.label_Name.Size = new System.Drawing.Size(35, 13);
             this.label_Name.TabIndex = 62;
@@ -169,7 +171,7 @@
             // 
             // textBox_Name
             // 
-            this.textBox_Name.Location = new System.Drawing.Point(70, 31);
+            this.textBox_Name.Location = new System.Drawing.Point(70, 6);
             this.textBox_Name.Name = "textBox_Name";
             this.textBox_Name.Size = new System.Drawing.Size(170, 20);
             this.textBox_Name.TabIndex = 61;
@@ -422,6 +424,17 @@
             this.checkBox_WinLog_MS.UseVisualStyleBackColor = true;
             this.checkBox_WinLog_MS.CheckedChanged += new System.EventHandler(this.checkBox_WinLog_MS_CheckedChanged);
             // 
+            // cbObjPath
+            // 
+            this.cbObjPath.AutoSize = true;
+            this.cbObjPath.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.cbObjPath.Location = new System.Drawing.Point(12, 63);
+            this.cbObjPath.Name = "cbObjPath";
+            this.cbObjPath.Size = new System.Drawing.Size(75, 17);
+            this.cbObjPath.TabIndex = 77;
+            this.cbObjPath.Text = "ByFolders ";
+            this.cbObjPath.UseVisualStyleBackColor = true;
+            // 
             // FrmAddConnection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -489,5 +502,6 @@
         private System.Windows.Forms.TextBox textBox_Server_MS;
         private System.Windows.Forms.CheckBox checkBox_WinLog_MS;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.CheckBox cbObjPath;
     }
 }

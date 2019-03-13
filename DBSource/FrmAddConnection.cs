@@ -53,6 +53,7 @@ namespace DBSource
             newRow.Type = xtraTabControl1.SelectedTabPage.Text;
             newRow.Name = textBox_Name.Text;
             newRow.Path = textBox_path.Text;
+            newRow.ByFolders = cbObjPath.Checked;
 
             if (newRow.Type == "Oracle")
             {                                              
@@ -106,6 +107,7 @@ namespace DBSource
             xtraTabControl1.SelectedTabPage = xtraTabControl1.TabPages.First(x => x.Text == load.Type);
             textBox_Name.Text = load.Name;
             textBox_path.Text = load.Path;
+            cbObjPath.Checked = load.ByFolders;
 
             switch (load.Type)
             {

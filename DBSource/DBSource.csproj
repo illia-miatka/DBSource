@@ -52,6 +52,9 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\iconfinder_039_034_tree_gallows_horror_halloween_3792080.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>DBSource.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DevExpress.Data.v13.2, Version=13.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.Printing.v13.2.Core, Version=13.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -168,7 +171,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Addons.cs" />
     <Compile Include="Crypt.cs" />
     <Compile Include="DataSet.cs">
       <DependentUpon>DataSet.xsd</DependentUpon>
@@ -178,8 +180,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataSet.xsd</DependentUpon>
     </Compile>
-    <Compile Include="DBConnectionMSSQl.cs" />
-    <Compile Include="DBConnectionOracle.cs" />
+    <Compile Include="Connections\DBConnectionMSSQl.cs" />
+    <Compile Include="Connections\DBConnectionOracle.cs" />
     <Compile Include="FrmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -192,6 +194,7 @@
     <Compile Include="FrmAddConnection.Designer.cs">
       <DependentUpon>FrmAddConnection.cs</DependentUpon>
     </Compile>
+    <Compile Include="GIT.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -410,6 +410,8 @@ namespace DBSource {
             
             private global::System.Data.DataColumn columnWinLogin;
             
+            private global::System.Data.DataColumn columnByFolders;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             public ConnectionListDataTable() {
@@ -549,6 +551,14 @@ namespace DBSource {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public global::System.Data.DataColumn ByFoldersColumn {
+                get {
+                    return this.columnByFolders;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -584,7 +594,7 @@ namespace DBSource {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
-            public ConnectionListRow AddConnectionListRow(string Name, string Protocol, string Host, int Port, string SID, string User, string Password, string Type, string TNS, bool IsDirect, string Path, string Server, bool WinLogin) {
+            public ConnectionListRow AddConnectionListRow(string Name, string Protocol, string Host, int Port, string SID, string User, string Password, string Type, string TNS, bool IsDirect, string Path, string Server, bool WinLogin, bool ByFolders) {
                 ConnectionListRow rowConnectionListRow = ((ConnectionListRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Name,
@@ -599,7 +609,8 @@ namespace DBSource {
                         IsDirect,
                         Path,
                         Server,
-                        WinLogin};
+                        WinLogin,
+                        ByFolders};
                 rowConnectionListRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowConnectionListRow);
                 return rowConnectionListRow;
@@ -635,6 +646,7 @@ namespace DBSource {
                 this.columnPath = base.Columns["Path"];
                 this.columnServer = base.Columns["Server"];
                 this.columnWinLogin = base.Columns["WinLogin"];
+                this.columnByFolders = base.Columns["ByFolders"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -666,8 +678,12 @@ namespace DBSource {
                 base.Columns.Add(this.columnServer);
                 this.columnWinLogin = new global::System.Data.DataColumn("WinLogin", typeof(bool), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnWinLogin);
+                this.columnByFolders = new global::System.Data.DataColumn("ByFolders", typeof(bool), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnByFolders);
                 this.columnIsDirect.DefaultValue = ((bool)(true));
                 this.columnPath.DefaultValue = ((string)("C:\\\\"));
+                this.columnByFolders.AllowDBNull = false;
+                this.columnByFolders.DefaultValue = ((bool)(false));
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -1810,6 +1826,17 @@ namespace DBSource {
                 }
                 set {
                     this[this.tableConnectionList.WinLoginColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "4.0.0.0")]
+            public bool ByFolders {
+                get {
+                    return ((bool)(this[this.tableConnectionList.ByFoldersColumn]));
+                }
+                set {
+                    this[this.tableConnectionList.ByFoldersColumn] = value;
                 }
             }
             

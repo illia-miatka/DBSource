@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
 using System.Windows.Forms;
@@ -44,13 +45,23 @@ namespace DBSource
             }
             foreach (Database db in _server.Databases)
             {
-                if (db.IsSystemObject) continue;
+                if (db.IsSystemObject) continue;               
                 _DBList.Add(db);
+                if ((from StoredProcedure p in db.StoredProcedures
+                    select p).Any())
                 _ObjectTypes.AddDbObjectTypesRow(db.Name + ".StoredProcedure");
-                _ObjectTypes.AddDbObjectTypesRow(db.Name + ".View");
-                _ObjectTypes.AddDbObjectTypesRow(db.Name + ".Table");
-                _ObjectTypes.AddDbObjectTypesRow(db.Name + ".UserDefinedFunction");
-                _ObjectTypes.AddDbObjectTypesRow(db.Name + ".User");
+                if ((from Microsoft.SqlServer.Management.Smo.View p in db.Views
+                    select p).Any())
+                    _ObjectTypes.AddDbObjectTypesRow(db.Name + ".View");
+                if ((from Table p in db.Tables
+                    select p).Any())
+                    _ObjectTypes.AddDbObjectTypesRow(db.Name + ".Table");
+                if ((from UserDefinedFunction p in db.UserDefinedFunctions
+                    select p).Any())
+                    _ObjectTypes.AddDbObjectTypesRow(db.Name + ".UserDefinedFunction");
+                if ((from User p in db.Users
+                     select p).Any())
+                    _ObjectTypes.AddDbObjectTypesRow(db.Name + ".User");
             }
 
             _server.SetDefaultInitFields(typeof(StoredProcedure), true);
@@ -68,82 +79,84 @@ namespace DBSource
             state = ConnectionState.Closed;
         }
 
-        public override void GetDBObjectNames(DataTable dt, string filterObjects, bool currentSchema, List<string> objectTypes = null)
+
+        private string GetTypeMS(string type)
         {
-            dt.Clear();
+            switch (type)
+            {
+                case "StoredProcedure":
+                    type = "SQL_STORED_PROCEDURE";
+                    break;
+                case "View":
+                    type = "VIEW";
+                    break;
+                case "Table":
+                    type = "USER_TABLE";
+                    break;
+                case "UserDefinedFunction":
+                    type = "SQL_TABLE_VALUED_FUNCTION','SQL_SCALAR_FUNCTION','SQL_INLINE_TABLE_VALUED_FUNCTION";
+                    break;
+                case "User":
+                    break;
+            }
+
+            return type;
+        }
+
+        public override void GetDBObjectNames(DataTable dataTable, string filterObjects, bool currentSchema, List<string> objectTypes = null)
+        {
+            dataTable.Clear();
             var dTab = new DataSet.DbObjectsDataTable();
+            var vDbList = new List<Database>();
 
             if (objectTypes == null)
             {
-                objectTypes = (from ot in _ObjectTypes select ot.NAME).Distinct().ToList();
+                objectTypes = (from t in _ObjectTypes select Helpers.GetFromOrEmpty(t.NAME, ".")).Distinct().ToList();
+                vDbList = (from row in _DBList
+                    select row).ToList();
+            }
+            else
+            {
+                var dbList = (from dbName in objectTypes select Helpers.GetUntilOrEmpty(dbName, ".")).Distinct().ToList();
+                vDbList = (from row in _DBList
+                    where dbList.Exists(p => p == row.Name)
+                    select row).ToList();
+                objectTypes = (from type in objectTypes select Helpers.GetFromOrEmpty(type, ".")).Distinct().ToList();
             }
 
-            foreach (var type in objectTypes)
+            foreach (var database in vDbList)
             {
-                var vDb = (from row in _DBList
-                         where row.Name == Helpers.GetUntilOrEmpty(type, ".")
-                         select row).FirstOrDefault();
-                var vType = Helpers.GetFromOrEmpty(type, ".");
+                var q = @"SELECT DB_NAME() + '.' + SCHEMA_NAME(schema_id) + '.' + name as FullName, name as Name ";
+                q += @" FROM sys.objects ";
+                q += @" WHERE type <> 'S' ";
+                q += filterObjects != "" ? @" and name like ('%" + filterObjects + @"%') " : "";
+                q +=
+                    @" and type_desc in ('$type$') ";
+                q += @" and is_ms_shipped = 0 ";
+                q += @" UNION ";
+                q += @" SELECT DB_NAME() + '..' + name as FullName, name as Name  FROM sys.sysusers ";
+                q += @" WHERE gid=0 and sid is not null ";
+                q += @" and name not in ('dbo', 'public', 'guest') ";
+                q += filterObjects != "" ? @" and name like ('%" + filterObjects + @"%') " : "";
+                q += @" and 'User' in ('$type$')";
 
-                try
+                foreach (var type in objectTypes)
                 {
-                    switch (vType)
+                    var dt = database.ExecuteWithResults(q.Replace("$type$", GetTypeMS(type)));
+                    var table = dt.Tables[0];
+                    var rows = table.Rows;
+                    foreach (DataRow row in rows)
                     {
-                        case "StoredProcedure":
-                            foreach (StoredProcedure obj in vDb.StoredProcedures)
-                                if ((currentSchema && obj.Schema != "sys") || (!currentSchema))
-                                {
-                                    if (obj.IsSystemObject) continue;
-                                    dTab.AddDbObjectsRow(vDb.Name + '.' + obj.Schema + '.' + obj.Name, obj.Name, vType);
-                                }
-                            break;
-                        case "View":
-                            foreach (Microsoft.SqlServer.Management.Smo.View obj in vDb.Views)
-                                if ((currentSchema && obj.Schema != "sys") || (!currentSchema))
-                                {
-                                    if (obj.IsSystemObject) continue;
-                                    dTab.AddDbObjectsRow(vDb.Name + '.' + obj.Schema + '.' + obj.Name, obj.Name, vType);
-                                }
-                            break;
-                        case "Table":
-                            foreach (Table obj in vDb.Tables)
-                                if ((currentSchema && obj.Schema != "sys") || (!currentSchema))
-                                {
-                                    if (obj.IsSystemObject) continue;
-                                    dTab.AddDbObjectsRow(vDb.Name + '.' + obj.Schema + '.' + obj.Name, obj.Name, vType);
-                                }
-                            break;
-                        case "UserDefinedFunction":
-                            foreach (UserDefinedFunction obj in vDb.UserDefinedFunctions)
-                                if ((currentSchema && obj.Schema != "sys") || (!currentSchema))
-                                {
-                                    if (obj.IsSystemObject) continue;
-                                    dTab.AddDbObjectsRow(vDb.Name + '.' + obj.Schema + '.' + obj.Name, obj.Name, vType);
-                                }
-                            break;
-                        case "User":
-                            foreach (User obj in vDb.Users)
-                            {
-                                if (obj.IsSystemObject) continue;
-                                dTab.AddDbObjectsRow(vDb.Name + '.' + '.' + obj.Name, obj.Name, vType);
-                            }
-                            break;
+                        var fullname = row["FullName"].ToString();
+                        var name = row["Name"].ToString();
+                        dTab.AddDbObjectsRow(fullname, name, type);
                     }
                 }
-                catch (Exception ex)
-                {
-                    var frm = MessageBox.Show("Continue? \n" + ex.Message, @"Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-                    if (frm == DialogResult.Yes)
-                    {
-                        continue;
-                    }
-                    else return;
-                }
-
             }
-            foreach( var row in (from p in dTab select p))
+
+            foreach ( var row in (from p in dTab select p))
             {
-                dt.ImportRow(row);
+                dataTable.ImportRow(row);
             }
         }
 
@@ -170,14 +183,18 @@ namespace DBSource
                     dbObj = GetUser(db, obj.OBJECT_NAME);
                     break;
             }
-            
+
+            if (dbObj == null) return "";
             Scripter scr = new Scripter(_server);
+            scr.Options.NoCommandTerminator = false;
+            scr.Options.ScriptBatchTerminator = true;
+            scr.Options.IncludeDatabaseContext = true;
             SqlSmoObject[] sso = new SqlSmoObject[1];
             sso[0] = dbObj;
             var sc = scr.Script(sso);
             string[] strArray = new string[sc.Count];
             sc.CopyTo(strArray, 0);
-            string text = string.Join("\n", strArray);
+            string text = string.Join("\nGO\n", strArray) + "\nGO\n";
             return text;
         }
 
@@ -190,10 +207,10 @@ namespace DBSource
 
         private StoredProcedure GetStoredProcedure(Database db, string name)
         {
-
             var proc = (from StoredProcedure p in db.StoredProcedures
                 where p.Name == name
                         select p).FirstOrDefault();
+            if (proc.IsSystemObject) proc = null;
             return proc;
         }
 
@@ -203,6 +220,7 @@ namespace DBSource
             var view = (from Microsoft.SqlServer.Management.Smo.View p in db.Views
                 where p.Name == name
                 select p).FirstOrDefault();
+            if (view.IsSystemObject) view = null;
             return view;
         }
 
@@ -212,6 +230,7 @@ namespace DBSource
             var func = (from UserDefinedFunction p in db.UserDefinedFunctions
                         where p.Name == name
                 select p).FirstOrDefault();
+            if (func.IsSystemObject) func = null;
             return func;
         }
 
@@ -221,6 +240,7 @@ namespace DBSource
             var user = (from User p in db.Users
                 where p.Name == name
                 select p).FirstOrDefault();
+            if (user.IsSystemObject) user = null;
             return user;
         }
 
@@ -230,38 +250,46 @@ namespace DBSource
             var tbl = (from Table p in db.Tables
                 where p.Name == name
                 select p).FirstOrDefault();
+            if (tbl.IsSystemObject) tbl = null;
             return tbl;
         }
 
-        public override string GetPath(string type, string name)
+        public override string GetPath(string type, string name, bool byFolders = false)
         {
             string path = @"\" + Helpers.GetUntilOrEmpty(name,".") + @"\";
-            switch (type)
+            if (byFolders)
             {
-                case "StoredProcedure":
-                    path += @"Stored Procedures";
-                    break;
-                case "View":
-                    path += @"Views";
-                    break;
-                case "Table":
-                    path += @"Tables";
-                    break;
-                case "UserDefinedFunction":
-                    path += @"Functions";
-                    break;
-                case "User":
-                    path += @"Security\Users";
-                    break;
+                switch (type)
+                {
+                    case "StoredProcedure":
+                        path += @"Stored Procedures";
+                        break;
+                    case "View":
+                        path += @"Views";
+                        break;
+                    case "Table":
+                        path += @"Tables";
+                        break;
+                    case "UserDefinedFunction":
+                        path += @"Functions";
+                        break;
+                    case "User":
+                        path += @"Security\Users";
+                        break;
+                }
+
+                path += @"\";
             }
 
-            path += @"\";
             return path;
         }
 
-        public override string GetFileName(string type, string name)
+        public override string GetFileName(string type, string name, bool withType = false)
         {
-            return Helpers.GetFromOrEmpty(name, ".") + @".sql";
+            var val = Helpers.GetFromOrEmpty(name, ".");
+            if (withType) val += @"." + type;
+            val += @".sql";
+            return val;
         }
 
         public override void GetDBObjectTypes(DataTable ds)

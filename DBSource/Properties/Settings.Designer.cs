@@ -22,5 +22,17 @@ namespace DBSource.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Config {
+            get {
+                return ((string)(this["Config"]));
+            }
+            set {
+                this["Config"] = value;
+            }
+        }
     }
 }

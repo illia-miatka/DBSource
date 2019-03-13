@@ -54,6 +54,8 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.button_GetSource_Stop = new System.Windows.Forms.Button();
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
+            this.buttonGIT = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
@@ -305,11 +307,30 @@
             this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
             this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
             // 
+            // backgroundWorker3
+            // 
+            this.backgroundWorker3.WorkerReportsProgress = true;
+            this.backgroundWorker3.WorkerSupportsCancellation = true;
+            this.backgroundWorker3.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker3_DoWork);
+            this.backgroundWorker3.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker3_RunWorkerCompleted);
+            // 
+            // buttonGIT
+            // 
+            this.buttonGIT.Location = new System.Drawing.Point(662, 199);
+            this.buttonGIT.Name = "buttonGIT";
+            this.buttonGIT.Size = new System.Drawing.Size(126, 23);
+            this.buttonGIT.TabIndex = 53;
+            this.buttonGIT.Text = "GIT Commit";
+            this.buttonGIT.UseVisualStyleBackColor = true;
+            this.buttonGIT.Visible = false;
+            this.buttonGIT.Click += new System.EventHandler(this.buttonGIT_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 550);
+            this.Controls.Add(this.buttonGIT);
             this.Controls.Add(this.button_GetSource_Stop);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.checkBox_loadAll);
@@ -368,6 +389,8 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Button button_GetSource_Stop;
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
+        private System.ComponentModel.BackgroundWorker backgroundWorker3;
+        private System.Windows.Forms.Button buttonGIT;
     }
 }
 

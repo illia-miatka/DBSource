@@ -142,6 +142,8 @@ namespace DBSource
 
         public override void GetDBObjectNames(DataTable dt, string filterObjects, bool currentSchema, List<string> objectTypes)
         {
+            dt.Clear();
+
             string stringCmd =
                 "SELECT DISTINCT '[' || OBJECT_TYPE || ']' || OBJECT_NAME AS NAME, OBJECT_NAME, OBJECT_TYPE " +
                 "FROM ( " +
@@ -196,14 +198,17 @@ namespace DBSource
                 "' as OBJECT_NAME, '" + Type + "' as OBJECT_TYPE  FROM DUAL";
         }
 
-        public override string GetPath(string Type, string Name)
+        public override string GetPath(string Type, string Name, bool ByFolders = false)
         {
-            var path = @"\" +
-                   (Type == "PACKAGE BODY" ? "PACKAGE" : Type) + @"S\";
+            var path = @"\";
+            if (ByFolders)
+            {
+                path += (Type == "PACKAGE BODY" ? "PACKAGE" : Type) + @"S\";
+            }
             return path;
         }
 
-        public override string GetFileName(string Type, string Name)
+        public override string GetFileName(string Type, string Name, bool WithType = false)
         {
             return Name + get_object_file_type(Type);
         }

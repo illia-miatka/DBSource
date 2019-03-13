@@ -37,8 +37,8 @@ namespace DBSource
 
         public abstract string GetDDL(DataSet.DbObjectsRow obj);
 
-        public abstract string GetPath(string Type, string Name);
-        public abstract string GetFileName(string Type, string Name);
+        public abstract string GetPath(string Type, string Name, bool ByFolders = false);
+        public abstract string GetFileName(string Type, string Name, bool WithType = false);
 
     }
 

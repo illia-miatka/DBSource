@@ -4,7 +4,11 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.XPath;
 using DevExpress.Data.PLinq.Helpers;
 
 namespace DBSource
@@ -17,12 +21,28 @@ namespace DBSource
         private DbConnection _con;
         private string _filterObjects = "";
         private string _path = "";
+        private bool _byFolders = false;
         private int _backgroundWorkerTaskId;
 
         public FrmMain()
         {
-            _connectionList.ReadXml("config");
+            ReadConfig();
             InitializeComponent();
+        }
+
+        private void ReadConfig()
+        {
+            try
+            {
+                using (TextReader S = new StringReader(Properties.Settings.Default["Config"].ToString()))
+                {
+                    _connectionList.ReadXml(S);
+                }
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.ToString());
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -38,6 +58,7 @@ namespace DBSource
                 select connection).First();
 
             _path = row.Path;
+            _byFolders = row.ByFolders;
 
             var par = new Dictionary<string, string>();
             var type = "";
@@ -115,7 +136,7 @@ namespace DBSource
 
             comboBox_Connections.Refresh();
 
-            save_Data();
+            SaveConfig();
 
         }
 
@@ -127,11 +148,12 @@ namespace DBSource
                     _con.Close();
             }
 
-            save_Data();
+            SaveConfig();
         }
 
         private void button_disconnect_Click(object sender, EventArgs e)
         {
+            button_GetSource_Stop_Click(sender, e);
             _con.Close();
             button_control_connect(false);
         }
@@ -190,15 +212,20 @@ namespace DBSource
             frm.ShowDialog();
         }
 
-        private void save_Data()
+        private void SaveConfig()
         {
             try
             {
-                _connectionList.WriteXml("config");
+                using (TextWriter S = new StringWriter())
+                {
+                    _connectionList.WriteXml(S);
+                    Properties.Settings.Default["Config"] = S.ToString();
+                    Properties.Settings.Default.Save();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
 
 
@@ -231,7 +258,7 @@ namespace DBSource
 
         private void button_addFilter_Click(object sender, EventArgs e)
         {
-            _filterObjects = Addons.ShowDialog("Set filter for objects names search:", "Edit filter", _filterObjects);
+            _filterObjects = Helpers.ShowDialog("Set filter for objects names search:", "Edit filter", _filterObjects);
             button_addFilter.BackColor = _filterObjects == "" ? default(Color) : Color.LightBlue;
         }
 
@@ -252,19 +279,31 @@ namespace DBSource
             {
                 try
                 {
-                    button_control_connect(true);
+                    //button_control_connect(true);
                     button_getSource.Text = "Load Objects";
                     Application.DoEvents();
-                    _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked);
+                    backgroundWorker3.RunWorkerAsync();
                 }
                 catch (Exception ex)
                 {
-                    button_control_connect(false);
                     MessageBox.Show(ex.ToString());
+                    button_control_connect(false);
                 }
                 finally
                 {
                     button_getSource.Text = "Start";
+                }
+
+                int i = 0;
+
+                while (backgroundWorker3.IsBusy)
+                {
+                    button_getSource.Text = new String(' ', i) + "Load Objects" + new String('.', i);
+                    System.Threading.Thread.Sleep(500);
+                    Application.DoEvents();
+                    i++;
+                    if(i>=3)
+                        i = 0;
                 }
             }
         }
@@ -272,9 +311,11 @@ namespace DBSource
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             double progress = 0;
-
+            var errors = new List<string>();
+            e.Result = errors;
             try
             {
+                backgroundWorker1.ReportProgress((int)(Math.Round(progress)));
                 {
                     var query = (from obj in _objects
                         where (checkedListBox_objects.CheckedItems.Contains(obj.NAME) && !checkBox_loadAll.Checked) ||
@@ -299,9 +340,15 @@ namespace DBSource
                             try
                             {
                                 
-                                var path = _path + _con.GetPath(obj.OBJECT_TYPE, obj.NAME);
+                                var path = _path + _con.GetPath(obj.OBJECT_TYPE, obj.NAME, _byFolders);
                                 var ddl = _con.GetDDL(obj);
-                                var fileName = _con.GetFileName(obj.OBJECT_TYPE, obj.NAME);
+                                if (ddl == "")
+                                {
+                                    var err = "Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]\n";
+                                    errors.Add(err);
+                                }
+
+                                var fileName = _con.GetFileName(obj.OBJECT_TYPE, obj.NAME, !_byFolders);
                                 if (!Directory.Exists(path))
                                     Directory.CreateDirectory(path);
                                 File.WriteAllText(path + Helpers.CheckForIllegalChar(fileName), ddl);
@@ -311,20 +358,7 @@ namespace DBSource
                             }
                             catch (Exception ex)
                             {
-                                if (
-                                    MessageBox.Show(
-                                        "Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME +
-                                        "]. Continue?", @"Error", MessageBoxButtons.YesNo,
-                                        MessageBoxIcon.Warning) == DialogResult.No)
-                                {
-                                    MessageBox.Show(
-                                        @"Message: " + ex.Message,
-                                        @"Error:" + @"[" + obj.OBJECT_TYPE + @"].[" + obj.OBJECT_NAME + @"]",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Error);
-                                    button_control_connect(false);
-                                    return;
-                                }
+                                errors.Add("Can't save object [" + obj.OBJECT_TYPE + "].[" + obj.OBJECT_NAME + "]" + " Error: " + ex.Message);
                             }
                         }
                     }
@@ -333,8 +367,8 @@ namespace DBSource
             }
             catch (Exception ex)
             {
-                button_control_connect(false);
                 MessageBox.Show(ex.ToString(), @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                errors.Add(" Error: " + ex.Message);
             }
         }
 
@@ -370,13 +404,44 @@ namespace DBSource
             {
                 resultText = "Error: " + e.Error.Message;
                 messageIcon = MessageBoxIcon.Error;
+                button_control_connect(false);
             }
             else
             {
                 resultText = "Done!";
             }
 
-            MessageBox.Show(resultText, Text, MessageBoxButtons.OK, messageIcon);
+            var errors = (e.Result as List<string>);
+            if (errors.Any())
+            {
+                resultText = resultText + @" There were errors! Save Log? ";
+                var frm = MessageBox.Show(resultText, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (frm == DialogResult.Yes)
+                {
+                    SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                    saveFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);      
+                    saveFileDialog1.Title = @"Save Log";
+                    saveFileDialog1.FileName = @"DBSource_" + DateTime.Now.ToString("yyyyMMdd_hhmmss");
+                    saveFileDialog1.DefaultExt = "txt";
+                    saveFileDialog1.Filter =
+                        @"Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    saveFileDialog1.CheckPathExists = true;
+                    saveFileDialog1.RestoreDirectory = true;
+                    if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                    {
+                        File.WriteAllText(saveFileDialog1.FileName, string.Join("\r\n", errors));
+                        var frm2 = MessageBox.Show("Open Log?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Hand);
+                        if (frm2 == DialogResult.Yes)
+                        {
+                            System.Diagnostics.Process.Start(saveFileDialog1.FileName);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show(resultText, Text, MessageBoxButtons.OK, messageIcon);
+            }
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -386,10 +451,31 @@ namespace DBSource
 
         private void button_GetSource_Stop_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker1.WorkerSupportsCancellation == true)
+            if (backgroundWorker1.IsBusy)
             {
-                // Cancel the asynchronous operation.
-                backgroundWorker1.CancelAsync();
+                if (backgroundWorker1.WorkerSupportsCancellation == true)
+                {
+                    // Cancel the asynchronous operation.
+                    backgroundWorker1.CancelAsync();
+                }
+            }
+
+            if (backgroundWorker2.IsBusy)
+            {
+                if (backgroundWorker2.WorkerSupportsCancellation == true)
+                {
+                    // Cancel the asynchronous operation.
+                    backgroundWorker2.CancelAsync();
+                }
+            }
+
+            if (backgroundWorker3.IsBusy)
+            {
+                if (backgroundWorker3.WorkerSupportsCancellation == true)
+                {
+                    // Cancel the asynchronous operation.
+                    backgroundWorker3.CancelAsync();
+                }
             }
         }
 
@@ -438,6 +524,21 @@ namespace DBSource
                     checkedListBox_objects.Refresh();
                     break;
             }
+        }
+
+        private void backgroundWorker3_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            _con.GetDBObjectNames(_objects, _filterObjects, checkBox_currentSchema.Checked);
+        }
+
+        private void backgroundWorker3_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            
+        }
+
+        private void buttonGIT_Click(object sender, EventArgs e)
+        {
+            GIT.GITCommit(_path, false);
         }
     }
 }
