@@ -546,5 +546,15 @@ namespace DBSource
             _filterDate = Helpers.ShowDialog("Date", "Recent object changes from:", _filterDate=="" ? DateTime.Now.ToString("dd/MM/yyyy 00:00") : _filterDate, new DateTimePicker() { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy HH:mm" });
             button_addDateFilter.BackColor = _filterDate == "" ? default(Color) : Color.LightBlue;                
         }
+
+        private void goToProjectPageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource");
+        }
+
+        private void wikiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource/Wiki");
+        }
     }
 }
