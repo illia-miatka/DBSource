@@ -554,7 +554,7 @@ namespace DBSource
 
         private void wikiToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource/Wiki");
+            System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource/wiki");
         }
     }
 }
