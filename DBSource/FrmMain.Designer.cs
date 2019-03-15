@@ -427,6 +427,7 @@
             this.Text = "DBSource";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Frm_Main_FormClosed);
             this.Load += new System.EventHandler(this.Frm_Main_Load);
+            this.Shown += new System.EventHandler(this.FrmMain_Shown);
             this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

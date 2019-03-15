@@ -605,5 +605,24 @@ namespace DBSource
             button_getSource.Image = null;
             button_getSource.Text = txt;
         }
+
+        private void setTips()
+        {
+            ToolTip tt = new ToolTip();
+            tt.SetToolTip(this.button_getSource, "Start");
+            tt.SetToolTip(this.button_GetSource_Stop, "Stop");
+            tt.SetToolTip(this.button_addDateFilter, "Date Filter");
+            tt.SetToolTip(this.button_addFilter, "Name Filter");
+            tt.SetToolTip(this.button_connect, "Connect");
+            tt.SetToolTip(this.button_currentSchema, "Current Schema");
+            tt.SetToolTip(this.button_disconnect, "Disconnect");
+            tt.SetToolTip(this.checkBox_loadAll, "Load All Server Objects");
+            tt.SetToolTip(this.button_loadObjects, "Load Objects List");
+        }
+
+        private void FrmMain_Shown(object sender, EventArgs e)
+        {
+            setTips();
+        }
     }
 }
