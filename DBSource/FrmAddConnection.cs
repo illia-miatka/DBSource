@@ -15,6 +15,7 @@ namespace DBSource
             InitializeComponent();
             _isEditMode = isEditMode;
             textBox_Name.Text = name;
+            this.DialogResult = DialogResult.Cancel;
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -87,6 +88,7 @@ namespace DBSource
             }
 
             ConnectionList.AddConnectionListRow(newRow);
+            this.DialogResult = DialogResult.OK;
             Close();
         }
 
@@ -148,6 +150,7 @@ namespace DBSource
             using (var dialog = new FolderBrowserDialog())
             {
                 dialog.ShowDialog();
+                if (dialog.SelectedPath != "")
                 textBox_path.Text = dialog.SelectedPath;
             }
         }
@@ -168,6 +171,11 @@ namespace DBSource
             {
                 pictureBox1.Image = Properties.Resources.MSSQL;
             }
+        }
+
+        public string getConnectionName()
+        {
+            return textBox_Name.Text;
         }
     }
 }

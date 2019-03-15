@@ -4,12 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Xml.XPath;
-using DevExpress.Data.PLinq.Helpers;
 
 namespace DBSource
 {
@@ -24,6 +19,7 @@ namespace DBSource
         private string _path = "";
         private bool _byFolders = false;
         private int _backgroundWorkerTaskId;
+        private bool currentSchema = true;
 
         public FrmMain()
         {
@@ -170,7 +166,7 @@ namespace DBSource
             editToolStripMenuItem.Enabled = !isConnected;
             button_loadObjects.Enabled = isConnected;
             button_getSource.Enabled = isConnected;
-            checkBox_currentSchema.Enabled = isConnected;
+            currentSchema = isConnected;
 
             if (isConnected) return;
             checkedListBox_objectTypes.Items.Clear();
@@ -185,6 +181,10 @@ namespace DBSource
                 Text = @"New connection"
             };
             frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                comboBox_Connections.SelectedItem = frm.getConnectionName();
+            }
         }
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
@@ -234,12 +234,17 @@ namespace DBSource
 
         private void button_loadObjects_Click(object sender, EventArgs e)
         {
-            if (checkedListBox_objectTypes.CheckedItems.Count == 0) return;
+            if (checkedListBox_objectTypes.CheckedItems.Count == 0)
+            {
+                checkedListBox_objects.Items.Clear();
+                return;
+            }
+
             try
             {
                 button_control_connect(true);
                 {
-                   _con.GetDBObjectNames(_objects, new Filter(_filterObjects,_filterDate), checkBox_currentSchema.Checked, 
+                   _con.GetDBObjectNames(_objects, new Filter(_filterObjects,_filterDate), currentSchema, 
                        checkedListBox_objectTypes.CheckedItems.OfType<string>().ToList());
                     _backgroundWorkerTaskId = 2;
                     backgroundWorker2.RunWorkerAsync();
@@ -252,21 +257,15 @@ namespace DBSource
             }
         }
 
-        private void checkBox_LoadMode_CheckedChanged(object sender, EventArgs e)
-        {
-            checkedListBox_objects.Enabled = !checkBox_LoadMode.Checked;
-        }
-
         private void button_addFilter_Click(object sender, EventArgs e)
         {
             _filterObjects = Helpers.ShowDialog("Set filter for objects names search:", "Edit filter", _filterObjects);
-            button_addFilter.BackColor = _filterObjects == "" ? default(Color) : Color.LightBlue;
+            button_addFilter.BackColor = _filterObjects == "" ? default(Color) : Color.GreenYellow;
         }
 
         private void button_getSource_Click(object sender, EventArgs e)
         {
-            if (checkedListBox_objects.CheckedItems.Count == 0 && !checkBox_LoadMode.Checked &&
-                !checkBox_loadAll.Checked) return;
+            if (checkedListBox_objects.CheckedItems.Count == 0 && !checkBox_loadAll.Checked) return;
 
             button_getSource.Enabled = false;
             is_load_All();
@@ -281,7 +280,8 @@ namespace DBSource
                 try
                 {
                     //button_control_connect(true);
-                    button_getSource.Text = "Load Objects";
+                    //button_getSource.Text = "Load Objects";
+                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_downloads_folder_30));
                     Application.DoEvents();
                     backgroundWorker3.RunWorkerAsync();
                 }
@@ -292,14 +292,15 @@ namespace DBSource
                 }
                 finally
                 {
-                    button_getSource.Text = "Start";
+                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_start_30));
                 }
 
                 int i = 0;
 
                 while (backgroundWorker3.IsBusy)
                 {
-                    button_getSource.Text = new String(' ', i) + "Load Objects" + new String('.', i);
+                    //button_getSource.Text = new String(' ', i) + "Load Objects" + new String('.', i);
+                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_downloads_folder_30));
                     System.Threading.Thread.Sleep(500);
                     Application.DoEvents();
                     i++;
@@ -322,10 +323,6 @@ namespace DBSource
                         where (checkedListBox_objects.CheckedItems.Contains(obj.NAME) && !checkBox_loadAll.Checked) ||
                               (checkBox_loadAll.Checked)
                         select obj);
-
-                    if (checkBox_LoadMode.Checked)
-                        query = (from obj in _objects
-                            select obj);
 
                     var step = (double) 100 / query.Count();
 
@@ -377,7 +374,8 @@ namespace DBSource
         {
             checkedListBox_objectTypes.Enabled = !checkBox_loadAll.Checked;
             checkedListBox_objects.Enabled = !checkBox_loadAll.Checked;
-            checkBox_loadAll.Enabled = !checkBox_LoadMode.Checked;
+
+            checkBox_loadAll.BackColor = checkBox_loadAll.Checked ? Color.GreenYellow : default(Color);
 
         }
 
@@ -390,7 +388,8 @@ namespace DBSource
             System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             button_GetSource_Stop.Enabled = false;
-            button_getSource.Text = "Start";
+            //button_getSource.Text = "Start";
+            button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_start_30));
             button_getSource.Enabled = true;
 
             string resultText;
@@ -411,7 +410,11 @@ namespace DBSource
                 resultText = "Done!";
             }
 
-            var errors = (e.Result as List<string>);
+            var errors = new List<string>();
+            if (e.Result != null)
+            {
+                errors = (e.Result as List<string>);
+            }
             if (errors.Any())
             {
                 resultText = resultText + @" There were errors! Save Log? ";
@@ -446,7 +449,7 @@ namespace DBSource
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            button_getSource.Text = (e.ProgressPercentage.ToString() + @"%");
+            button_getSourceView(e.ProgressPercentage.ToString() + @"%");
         }
 
         private void button_GetSource_Stop_Click(object sender, EventArgs e)
@@ -528,7 +531,7 @@ namespace DBSource
 
         private void backgroundWorker3_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            _con.GetDBObjectNames(_objects, new Filter(_filterObjects, _filterDate) , checkBox_currentSchema.Checked);
+            _con.GetDBObjectNames(_objects, new Filter(_filterObjects, _filterDate) , currentSchema);
         }
 
         private void backgroundWorker3_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -544,7 +547,7 @@ namespace DBSource
         private void button_addDateFilter_Click(object sender, EventArgs e)
         {
             _filterDate = Helpers.ShowDialog("Date", "Recent object changes from:", _filterDate=="" ? DateTime.Now.ToString("dd/MM/yyyy 00:00") : _filterDate, new DateTimePicker() { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy HH:mm" });
-            button_addDateFilter.BackColor = _filterDate == "" ? default(Color) : Color.LightBlue;                
+            button_addDateFilter.BackColor = _filterDate == "" ? default(Color) : Color.GreenYellow;                
         }
 
         private void goToProjectPageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -555,6 +558,52 @@ namespace DBSource
         private void wikiToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource/wiki");
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            checkBoxElements(checkedListBox_objectTypes, true);
+        }
+
+        private void checkBoxElements(CheckedListBox checkedList, bool Check)
+        {
+            for (int i = 0; i < checkedList.Items.Count; i++)
+            {
+                checkedList.SetItemChecked(i, Check);
+            }
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            checkBoxElements(checkedListBox_objectTypes, false);
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            checkBoxElements(checkedListBox_objects, true);
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            checkBoxElements(checkedListBox_objects, false);
+        }
+
+        private void button_currentSchema_Click(object sender, EventArgs e)
+        {
+            currentSchema = !currentSchema;
+            button_currentSchema.BackColor = !currentSchema ? default(Color) : Color.GreenYellow;
+        }
+
+        private void button_getSourceView(Image img)
+        {
+            button_getSource.Text = "";
+            button_getSource.Image = img;
+        }
+
+        private void button_getSourceView(string txt)
+        {
+            button_getSource.Image = null;
+            button_getSource.Text = txt;
         }
     }
 }
