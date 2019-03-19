@@ -81,36 +81,32 @@ namespace DBSource
             {
                 case ButtonConnect.Connect:
                     img = Properties.Resources.icons8_connected_32;
-                    tip = "Press to connect.";
+                    tip = "Press to connect";
                     buttonConnect_subsConn(true);
                     buttonConnect_subsDisc(false);
                     break;
                 case ButtonConnect.Disconnect:
                     img = Properties.Resources.icons8_connected_failed_32;
-                    tip = "Press to disconnect.";
+                    tip = "Press to disconnect";
                     buttonConnect_subsConn(false);
                     buttonConnect_subsDisc(true);
                     break;
                 case ButtonConnect.Broken:
                     img = Properties.Resources.icons8_broken_link_filled_32;
-                    tip = "Broken. Press to connect.";
+                    tip = "Broken. Press to connect";
                     buttonConnect_subsConn(true);
                     buttonConnect_subsDisc(false);
                     break;
                 case ButtonConnect.Init:
                 default:
                     img = Properties.Resources.icons8_link_32;
-                    tip = "Choose connection.";
+                    tip = "Choose connection";
                     buttonConnect_subsConn(false);
                     buttonConnect_subsDisc(false);
                     break;
             }
 
-            using (ToolTip tt = new ToolTip())
-            {
-                tt.SetToolTip(button_connect, tip);
-            }
-
+            button_connect.ToolTip = tip;
             button_connect.Image = img;
         }
 
@@ -668,16 +664,13 @@ namespace DBSource
 
         private void SetTips()
         {
-            using (var tt = new ToolTip())
-            {
-                tt.SetToolTip(button_getSource, "Start");
-                tt.SetToolTip(button_GetSource_Stop, "Stop");
-                tt.SetToolTip(button_addDateFilter, "Date Filter");
-                tt.SetToolTip(button_addFilter, "Name Filter");
-                tt.SetToolTip(button_currentSchema, "Current Schema");
-                tt.SetToolTip(button_loadAll, "Load All Server Objects");
-                tt.SetToolTip(button_loadObjects, "Load Objects List");
-            }
+            button_getSource.ToolTip = @"Start";
+            button_GetSource_Stop.ToolTip = @"Stop";
+            button_addDateFilter.ToolTip = @"Date Filter";
+            button_addFilter.ToolTip = @"Name Filter";
+            button_currentSchema.ToolTip = @"Current Schema";
+            button_loadAll.ToolTip = @"Load All Server Objects";
+            button_loadObjects.ToolTip = @"Load Objects List";
         }
 
         private void FrmMain_Shown(object sender, EventArgs e)
