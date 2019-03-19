@@ -6,13 +6,13 @@ using DevExpress.LookAndFeel;
 
 namespace DBSource
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             UserLookAndFeel.Default.SetSkinStyle(Properties.Settings.Default.SkinName);
             Application.EnableVisualStyles();
@@ -23,13 +23,6 @@ namespace DBSource
 
     internal abstract class DbConnection
     {
-        protected DbConnection(string type, Dictionary<string, string> par)
-        {
-        }
-
-        protected DbConnection()
-        {
-        }
         public abstract void Close();
         public abstract ConnectionState State();
         public abstract void GetDBObjectTypes(DataTable ds);

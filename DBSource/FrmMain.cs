@@ -9,6 +9,7 @@ using DevExpress.DXCore.Controls.XtraEditors;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraSplashScreen;
+using BaseCheckedListBoxControl = DevExpress.XtraEditors.BaseCheckedListBoxControl;
 
 namespace DBSource
 {
@@ -44,12 +45,12 @@ namespace DBSource
         {
             try
             {
-                using (TextReader S = new StringReader(Properties.Settings.Default["Config"].ToString()))
+                using (TextReader s = new StringReader(Properties.Settings.Default["Config"].ToString()))
                 {
-                    _connectionList.ReadXml(S);
+                    _connectionList.ReadXml(s);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //MessageBox.Show(e.ToString());
             }
@@ -57,24 +58,24 @@ namespace DBSource
 
         private void buttonConnect_subsConn(bool enabled)
         {
-            if (!enabled) button_connect.Click -= new System.EventHandler(this.buttonConnect_Click);
+            if (!enabled) button_connect.Click -= buttonConnect_Click;
             else if (!_subscribedConn)
-                button_connect.Click += new System.EventHandler(this.buttonConnect_Click);
+                button_connect.Click += buttonConnect_Click;
             _subscribedConn = enabled;
         }
 
         private void buttonConnect_subsDisc(bool enabled)
         {
-            if (!enabled) button_connect.Click -= new System.EventHandler(this.button_disconnect_Click);
+            if (!enabled) button_connect.Click -= button_disconnect_Click;
             else if (!_subscribedDisc)
-                button_connect.Click += new System.EventHandler(this.button_disconnect_Click);
+                button_connect.Click += button_disconnect_Click;
             _subscribedDisc = enabled;
         }
 
         private void buttonConnect_Style(ButtonConnect e)
         {
-            Image img = null;
-            string tip = "";
+            Image img;
+            var tip = "";
 
             switch (e)
             {
@@ -107,7 +108,7 @@ namespace DBSource
 
             using (ToolTip tt = new ToolTip())
             {
-                tt.SetToolTip(this.button_connect, tip);
+                tt.SetToolTip(button_connect, tip);
             }
 
             button_connect.Image = img;
@@ -133,54 +134,56 @@ namespace DBSource
                 var par = new Dictionary<string, string>();
                 var type = "";
 
-                if (row.Type == "Oracle")
+                switch (row.Type)
                 {
-                    if (row.IsDirect)
+                    case "Oracle":
                     {
-                        par.Add("user", row.User);
-                        par.Add("password", Crypt.Decrypt(row.Password));
-                        par.Add("protocol", row.Protocol);
-                        par.Add("host", row.Host);
-                        par.Add("port", row.Port.ToString());
-                        par.Add("sid", row.SID);
-                        type = "direct";
-                    }
-                    else
-                    {
-                        par.Add("user", row.User);
-                        par.Add("password", Crypt.Decrypt(row.Password));
-                        par.Add("tns", row.TNS);
-                        type = "notdirect";
-                    }
+                        if (row.IsDirect)
+                        {
+                            par.Add("user", row.User);
+                            par.Add("password", Crypt.Decrypt(row.Password));
+                            par.Add("protocol", row.Protocol);
+                            par.Add("host", row.Host);
+                            par.Add("port", row.Port.ToString());
+                            par.Add("sid", row.SID);
+                            type = "direct";
+                        }
+                        else
+                        {
+                            par.Add("user", row.User);
+                            par.Add("password", Crypt.Decrypt(row.Password));
+                            par.Add("tns", row.TNS);
+                            type = "notdirect";
+                        }
 
-                    _con = new DbConnectionOracle(type, par);
+                        _con = new DbConnectionOracle(type, par);
+                        break;
+                    }
+                    case "MSSQL":
+                    {
+                        if (row.WinLogin)
+                        {
+                            par.Add("server", row.Server);
+                            type = "direct";
+                        }
+                        else
+                        {
+                            par.Add("server", row.Server);
+                            par.Add("user", row.User);
+                            par.Add("password", Crypt.Decrypt(row.Password));
+                            type = "notdirect";
+                        }
+
+                        _con = new DBConnectionMSSQl(type, par);
+                        if (_con.State() != ConnectionState.Open)
+                        {
+                            buttonConnect_Style(ButtonConnect.Broken);
+                            return;
+                        }
+
+                        break;
+                    }
                 }
-
-                if (row.Type == "MSSQL")
-                {
-
-                    if (row.WinLogin)
-                    {
-                        par.Add("server", row.Server);
-                        type = "direct";
-                    }
-                    else
-                    {
-                        par.Add("server", row.Server);
-                        par.Add("user", row.User);
-                        par.Add("password", Crypt.Decrypt(row.Password));
-                        type = "notdirect";
-                    }
-
-                    _con = new DBConnectionMSSQl(type, par);
-                    if (_con.State() != ConnectionState.Open)
-                    {
-                        buttonConnect_Style(ButtonConnect.Broken);
-                        return;
-                    }
-
-                }
-
 
 
                 _con.GetDBObjectTypes(dataSet.DbObjectTypes);
@@ -298,7 +301,7 @@ namespace DBSource
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                comboBox_Connections.SelectedItem = frm.getConnectionName();
+                comboBox_Connections.SelectedItem = frm.GetConnectionName();
             }
         }
 
@@ -306,14 +309,14 @@ namespace DBSource
         {
             try
             {
-                using (TextWriter S = new StringWriter())
+                using (TextWriter s = new StringWriter())
                 {
-                    _connectionList.WriteXml(S);
-                    Properties.Settings.Default["Config"] = S.ToString();
+                    _connectionList.WriteXml(s);
+                    Properties.Settings.Default["Config"] = s.ToString();
                     Properties.Settings.Default.Save();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //MessageBox.Show(ex.ToString());
             }
@@ -370,39 +373,34 @@ namespace DBSource
 
         private void is_load_All()
         {
-            if (_loadAll)
+            if (!_loadAll) return;
+            try
             {
-                try
-                {
-                    //button_control_connect(true);
-                    //button_getSource.Text = "Load Objects";
-                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_downloads_folder_30));
-                    Application.DoEvents();
-                    backgroundWorker3.RunWorkerAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                    buttonConnect_Style(ButtonConnect.Broken);
-                    button_control_connect(false);
-                }
-                finally
-                {
-                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_start_30));
-                }
+                button_getSourceView(new Bitmap(Properties.Resources.icons8_downloads_folder_30));
+                Application.DoEvents();
+                backgroundWorker3.RunWorkerAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+                buttonConnect_Style(ButtonConnect.Broken);
+                button_control_connect(false);
+            }
+            finally
+            {
+                button_getSourceView(new Bitmap(Properties.Resources.icons8_start_30));
+            }
 
-                int i = 0;
+            var i = 0;
 
-                while (backgroundWorker3.IsBusy)
-                {
-                    //button_getSource.Text = new String(' ', i) + "Load Objects" + new String('.', i);
-                    button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_downloads_folder_30));
-                    System.Threading.Thread.Sleep(500);
-                    Application.DoEvents();
-                    i++;
-                    if (i >= 3)
-                        i = 0;
-                }
+            while (backgroundWorker3.IsBusy)
+            {
+                button_getSourceView(new Bitmap(Properties.Resources.icons8_downloads_folder_30));
+                System.Threading.Thread.Sleep(500);
+                Application.DoEvents();
+                i++;
+                if (i >= 3)
+                    i = 0;
             }
         }
 
@@ -427,7 +425,7 @@ namespace DBSource
 
                     foreach (var obj in query)
                     {
-                        if (backgroundWorker1.CancellationPending == true)
+                        if (backgroundWorker1.CancellationPending)
                         {
                             e.Cancel = true;
                             break;
@@ -479,13 +477,13 @@ namespace DBSource
         {
             button_GetSource_Stop.Enabled = false;
             //button_getSource.Text = "Start";
-            button_getSourceView(new Bitmap(DBSource.Properties.Resources.icons8_start_30));
+            button_getSourceView(new Bitmap(Properties.Resources.icons8_start_30));
             button_getSource.Enabled = true;
 
             string resultText;
             var messageIcon = MessageBoxIcon.Information;
 
-            if (e.Cancelled == true)
+            if (e.Cancelled)
             {
                 resultText = "Canceled!";
             }
@@ -509,20 +507,20 @@ namespace DBSource
                         var frm = MessageBox.Show(resultText, Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                         if (frm == DialogResult.Yes)
                         {
-                            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-                            saveFileDialog1.InitialDirectory =
-                                Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                            saveFileDialog1.Title = @"Save Log";
-                            saveFileDialog1.FileName = @"DBSource_" + DateTime.Now.ToString("yyyyMMdd_hhmmss");
-                            saveFileDialog1.DefaultExt = "txt";
-                            saveFileDialog1.Filter =
-                                @"Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                            saveFileDialog1.CheckPathExists = true;
-                            saveFileDialog1.RestoreDirectory = true;
+                            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+                            {
+                                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                                Title = @"Save Log",
+                                FileName = @"DBSource_" + DateTime.Now.ToString("yyyyMMdd_hhmmss"),
+                                DefaultExt = "txt",
+                                Filter = @"Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                                CheckPathExists = true,
+                                RestoreDirectory = true
+                            };
                             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                             {
                                 File.WriteAllText(saveFileDialog1.FileName, string.Join("\r\n", errors));
-                                var frm2 = MessageBox.Show("Open Log?", Text, MessageBoxButtons.YesNo,
+                                var frm2 = MessageBox.Show(@"Open Log?", Text, MessageBoxButtons.YesNo,
                                     MessageBoxIcon.Hand);
                                 if (frm2 == DialogResult.Yes)
                                 {
@@ -531,12 +529,9 @@ namespace DBSource
                             }
                         }
                     }
-                    else
-                    {
-                        MessageBox.Show(resultText, Text, MessageBoxButtons.OK, messageIcon);
-                    }
                 }
             }
+            MessageBox.Show(resultText, Text, MessageBoxButtons.OK, messageIcon);
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -548,7 +543,7 @@ namespace DBSource
         {
             if (backgroundWorker1.IsBusy)
             {
-                if (backgroundWorker1.WorkerSupportsCancellation == true)
+                if (backgroundWorker1.WorkerSupportsCancellation)
                 {
                     // Cancel the asynchronous operation.
                     backgroundWorker1.CancelAsync();
@@ -557,7 +552,7 @@ namespace DBSource
 
             if (backgroundWorker2.IsBusy)
             {
-                if (backgroundWorker2.WorkerSupportsCancellation == true)
+                if (backgroundWorker2.WorkerSupportsCancellation)
                 {
                     // Cancel the asynchronous operation.
                     backgroundWorker2.CancelAsync();
@@ -566,7 +561,7 @@ namespace DBSource
 
             if (backgroundWorker3.IsBusy)
             {
-                if (backgroundWorker3.WorkerSupportsCancellation == true)
+                if (backgroundWorker3.WorkerSupportsCancellation)
                 {
                     // Cancel the asynchronous operation.
                     backgroundWorker3.CancelAsync();
@@ -641,36 +636,16 @@ namespace DBSource
         {
             _filterDate = Helpers.ShowDialog("Date", "Recent object changes from:",
                 _filterDate == "" ? DateTime.Now.ToString("dd/MM/yyyy 00:00") : _filterDate,
-                new DateTimePicker() {Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy HH:mm"});
+                new DateTimePicker() {Format = DateTimePickerFormat.Custom, CustomFormat = @"dd/MM/yyyy HH:mm"});
             button_addDateFilter.ButtonStyle = _filterDate != "" ? BorderStyles.Flat : BorderStyles.Default;
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private static void CheckBoxElements(BaseCheckedListBoxControl checkedList, bool check)
         {
-            checkBoxElements(checkedListBox_objectTypes, true);
-        }
-
-        private void checkBoxElements(DevExpress.XtraEditors.CheckedListBoxControl checkedList, bool Check)
-        {
-            for (int i = 0; i < checkedList.ItemCount; i++)
+            for (var i = 0; i < checkedList.ItemCount; i++)
             {
-                checkedList.SetItemChecked(i, Check);
+                checkedList.SetItemChecked(i, check);
             }
-        }
-
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
-        {
-            checkBoxElements(checkedListBox_objectTypes, false);
-        }
-
-        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            checkBoxElements(checkedListBox_objects, true);
-        }
-
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            checkBoxElements(checkedListBox_objects, false);
         }
 
         private void button_currentSchema_Click(object sender, EventArgs e)
@@ -691,23 +666,23 @@ namespace DBSource
             button_getSource.Text = txt;
         }
 
-        private void setTips()
+        private void SetTips()
         {
-            using (ToolTip tt = new ToolTip())
+            using (var tt = new ToolTip())
             {
-                tt.SetToolTip(this.button_getSource, "Start");
-                tt.SetToolTip(this.button_GetSource_Stop, "Stop");
-                tt.SetToolTip(this.button_addDateFilter, "Date Filter");
-                tt.SetToolTip(this.button_addFilter, "Name Filter");
-                tt.SetToolTip(this.button_currentSchema, "Current Schema");
-                tt.SetToolTip(this.button_loadAll, "Load All Server Objects");
-                tt.SetToolTip(this.button_loadObjects, "Load Objects List");
+                tt.SetToolTip(button_getSource, "Start");
+                tt.SetToolTip(button_GetSource_Stop, "Stop");
+                tt.SetToolTip(button_addDateFilter, "Date Filter");
+                tt.SetToolTip(button_addFilter, "Name Filter");
+                tt.SetToolTip(button_currentSchema, "Current Schema");
+                tt.SetToolTip(button_loadAll, "Load All Server Objects");
+                tt.SetToolTip(button_loadObjects, "Load Objects List");
             }
         }
 
         private void FrmMain_Shown(object sender, EventArgs e)
         {
-            setTips();
+            SetTips();
             buttonConnect_Style(ButtonConnect.Init);
             DevExpress.XtraBars.Helpers.SkinHelper.InitSkinPopupMenu(barSubItem_DevStyle);
             UserLookAndFeel.Default.StyleChanged +=
@@ -752,23 +727,23 @@ namespace DBSource
 
         private void bbCh1_Clear_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            checkBoxElements(checkedListBox_objectTypes, false);
+            CheckBoxElements(checkedListBox_objectTypes, false);
         }
 
         private void bbCh1_SelectAll_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            checkBoxElements(checkedListBox_objectTypes, true);
+            CheckBoxElements(checkedListBox_objectTypes, true);
 
         }
 
         private void bbCh2_SelectAll_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            checkBoxElements(checkedListBox_objects, true);
+            CheckBoxElements(checkedListBox_objects, true);
         }
 
         private void bbCh2_Clear_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            checkBoxElements(checkedListBox_objects, false);
+            CheckBoxElements(checkedListBox_objects, false);
         }
 
         private void checkedListBox_objects_MouseDown(object sender, MouseEventArgs e)

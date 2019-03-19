@@ -3,12 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.XPath;
 
 namespace DBSource
 {
-    class Helpers
+    internal class Helpers
     {        
         /// <summary>
         /// Helpers Class
@@ -75,7 +73,7 @@ namespace DBSource
 
             if (!result)
             {
-                MessageBox.Show("Incorrect Path: " + mess, @"Error", MessageBoxButtons.OK,
+                MessageBox.Show(@"Incorrect Path: " + mess, @"Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
             }
 

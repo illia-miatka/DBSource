@@ -15,7 +15,7 @@ namespace DBSource
             InitializeComponent();
             _isEditMode = isEditMode;
             textBox_Name.Text = name;
-            this.DialogResult = DialogResult.Cancel;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -88,7 +88,7 @@ namespace DBSource
             }
 
             ConnectionList.AddConnectionListRow(newRow);
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
             Close();
         }
 
@@ -163,18 +163,18 @@ namespace DBSource
 
         private void xtraTabControl1_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
         {
-            if (xtraTabControl1.SelectedTabPage.Text == "Oracle")
+            switch (xtraTabControl1.SelectedTabPage.Text)
             {
-                pictureBox1.Image = Properties.Resources.Oracle;
-            }
-
-            if (xtraTabControl1.SelectedTabPage.Text == "MSSQL")
-            {
-                pictureBox1.Image = Properties.Resources.MSSQL;
+                case "Oracle":
+                    pictureBox1.Image = Properties.Resources.Oracle;
+                    break;
+                case "MSSQL":
+                    pictureBox1.Image = Properties.Resources.MSSQL;
+                    break;
             }
         }
 
-        public string getConnectionName()
+        public string GetConnectionName()
         {
             return textBox_Name.Text;
         }
