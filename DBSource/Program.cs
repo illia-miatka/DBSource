@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
+using DevExpress.LookAndFeel;
 
 namespace DBSource
 {
@@ -13,6 +14,7 @@ namespace DBSource
         [STAThread]
         static void Main()
         {
+            UserLookAndFeel.Default.SetSkinStyle(Properties.Settings.Default.SkinName);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new FrmMain());

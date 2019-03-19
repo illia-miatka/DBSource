@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace DBSource
 {
-    public partial class FrmAddConnection : Form
+    public partial class FrmAddConnection : DevExpress.XtraEditors.XtraForm
     {
         public DataSet.ConnectionListDataTable ConnectionList;
         private readonly bool _isEditMode;
@@ -25,7 +25,7 @@ namespace DBSource
 
         private void button_Save_Click(object sender, EventArgs e)
         {
-            if(!Helpers.CheckPath(textBox_path.Text))
+            if (!Helpers.CheckPath(textBox_path.Text))
                 return;
 
             if (_isEditMode)
@@ -57,7 +57,7 @@ namespace DBSource
             newRow.ByFolders = cbObjPath.Checked;
 
             if (newRow.Type == "Oracle")
-            {                                              
+            {
                 newRow.IsDirect = checkBox_DC.Checked;
                 newRow.User = textBox_User.Text;
                 newRow.Password = Crypt.Encrypt(textBox_Password.Text);
@@ -151,7 +151,7 @@ namespace DBSource
             {
                 dialog.ShowDialog();
                 if (dialog.SelectedPath != "")
-                textBox_path.Text = dialog.SelectedPath;
+                    textBox_path.Text = dialog.SelectedPath;
             }
         }
 
@@ -167,6 +167,7 @@ namespace DBSource
             {
                 pictureBox1.Image = Properties.Resources.Oracle;
             }
+
             if (xtraTabControl1.SelectedTabPage.Text == "MSSQL")
             {
                 pictureBox1.Image = Properties.Resources.MSSQL;
