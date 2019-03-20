@@ -73,13 +73,13 @@ namespace DBSource
             this.barButtonItem1 = new DevExpress.XtraBars.BarButtonItem();
             this.bbCh1_SelectAll = new DevExpress.XtraBars.BarButtonItem();
             this.bbCh1_Clear = new DevExpress.XtraBars.BarButtonItem();
-            this.comboBox_Connections = new DevExpress.XtraEditors.ComboBoxEdit();
-            this.popupMenu1 = new DevExpress.XtraBars.PopupMenu();
             this.bbCh2_SelectAll = new DevExpress.XtraBars.BarButtonItem();
             this.bbCh2_Clear = new DevExpress.XtraBars.BarButtonItem();
-            this.popupMenu2 = new DevExpress.XtraBars.PopupMenu();
             this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
             this.barButtonItem3 = new DevExpress.XtraBars.BarButtonItem();
+            this.comboBox_Connections = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.popupMenu1 = new DevExpress.XtraBars.PopupMenu();
+            this.popupMenu2 = new DevExpress.XtraBars.PopupMenu();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkedListBox_objects)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbObjectsBindingSource)).BeginInit();
@@ -477,25 +477,6 @@ namespace DBSource
             this.bbCh1_Clear.Name = "bbCh1_Clear";
             this.bbCh1_Clear.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.bbCh1_Clear_ItemClick);
             // 
-            // comboBox_Connections
-            // 
-            this.comboBox_Connections.Location = new System.Drawing.Point(9, 65);
-            this.comboBox_Connections.MenuManager = this.barManager1;
-            this.comboBox_Connections.Name = "comboBox_Connections";
-            this.comboBox_Connections.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboBox_Connections.Size = new System.Drawing.Size(194, 20);
-            this.comboBox_Connections.TabIndex = 69;
-            this.comboBox_Connections.SelectedIndexChanged += new System.EventHandler(this.comboBox_Connections_SelectedIndexChanged);
-            // 
-            // popupMenu1
-            // 
-            this.popupMenu1.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(this.bbCh1_SelectAll),
-            new DevExpress.XtraBars.LinkPersistInfo(this.bbCh1_Clear)});
-            this.popupMenu1.Manager = this.barManager1;
-            this.popupMenu1.Name = "popupMenu1";
-            // 
             // bbCh2_SelectAll
             // 
             this.bbCh2_SelectAll.Caption = "Select all";
@@ -510,14 +491,6 @@ namespace DBSource
             this.bbCh2_Clear.Name = "bbCh2_Clear";
             this.bbCh2_Clear.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.bbCh2_Clear_ItemClick);
             // 
-            // popupMenu2
-            // 
-            this.popupMenu2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem2),
-            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem3)});
-            this.popupMenu2.Manager = this.barManager1;
-            this.popupMenu2.Name = "popupMenu2";
-            // 
             // barButtonItem2
             // 
             this.barButtonItem2.Caption = "Select all";
@@ -531,6 +504,35 @@ namespace DBSource
             this.barButtonItem3.Id = 16;
             this.barButtonItem3.Name = "barButtonItem3";
             this.barButtonItem3.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.bbCh2_Clear_ItemClick);
+            // 
+            // comboBox_Connections
+            // 
+            this.comboBox_Connections.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.comboBox_Connections.Location = new System.Drawing.Point(9, 65);
+            this.comboBox_Connections.MenuManager = this.barManager1;
+            this.comboBox_Connections.Name = "comboBox_Connections";
+            this.comboBox_Connections.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.comboBox_Connections.Size = new System.Drawing.Size(194, 20);
+            this.comboBox_Connections.TabIndex = 69;
+            this.comboBox_Connections.SelectedIndexChanged += new System.EventHandler(this.comboBox_Connections_SelectedIndexChanged);
+            this.comboBox_Connections.Leave += new System.EventHandler(this.comboBox_Connections_Leave);
+            // 
+            // popupMenu1
+            // 
+            this.popupMenu1.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.bbCh1_SelectAll),
+            new DevExpress.XtraBars.LinkPersistInfo(this.bbCh1_Clear)});
+            this.popupMenu1.Manager = this.barManager1;
+            this.popupMenu1.Name = "popupMenu1";
+            // 
+            // popupMenu2
+            // 
+            this.popupMenu2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem2),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem3)});
+            this.popupMenu2.Manager = this.barManager1;
+            this.popupMenu2.Name = "popupMenu2";
             // 
             // FrmMain
             // 

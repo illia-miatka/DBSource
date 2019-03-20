@@ -15,7 +15,6 @@ namespace DBSource
 {
     public partial class FrmMain : DevExpress.XtraEditors.XtraForm
     {
-        private readonly DataSet.ConnectionListDataTable _connectionList = new DataSet.ConnectionListDataTable();
         private DbConnection _con;
         private string _filterObjects = "";
         private string _filterDate = "";
@@ -36,8 +35,7 @@ namespace DBSource
         }
 
         public FrmMain()
-        {
-            ReadConfig();
+        {           
             InitializeComponent();
         }
 
@@ -47,12 +45,12 @@ namespace DBSource
             {
                 using (TextReader s = new StringReader(Properties.Settings.Default["Config"].ToString()))
                 {
-                    _connectionList.ReadXml(s);
+                    dataSet.ConnectionList.ReadXml(s);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //MessageBox.Show(e.ToString());
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -100,7 +98,7 @@ namespace DBSource
                 case ButtonConnect.Init:
                 default:
                     img = Properties.Resources.icons8_link_32;
-                    tip = "Choose connection";
+                    tip = "Choose connection.";
                     buttonConnect_subsConn(false);
                     buttonConnect_subsDisc(false);
                     break;
@@ -120,7 +118,7 @@ namespace DBSource
                     return;
                 }
 
-                var row = (from connection in _connectionList
+                var row = (from connection in dataSet.ConnectionList
                     where connection.Name == comboBox_Connections.Text
                     select connection).First();
 
@@ -204,23 +202,23 @@ namespace DBSource
 
         private void Frm_Main_Load(object sender, EventArgs e)
         {
-            _connectionList.RowChanged += comboBox_Connections_Refresh;
-            _connectionList.ConnectionListRowDeleted += comboBox_Connections_Refresh;
+            ReadConfig();
+            dataSet.ConnectionList.RowChanged += comboBox_Connections_Refresh;
+            dataSet.ConnectionList.ConnectionListRowDeleted += comboBox_Connections_Refresh;
             comboBox_Connections_Refresh(sender, e);
         }
 
         private void comboBox_Connections_Refresh(object sender, EventArgs e)
         {
             comboBox_Connections.Properties.Items.Clear();
-            var query = from connection in _connectionList
-                orderby connection.Name ascending
+            var query = from connection in dataSet.ConnectionList
+                        orderby connection.Name ascending
                 select connection.Name;
 
             foreach (var r in query.ToList())
             {
                 comboBox_Connections.Properties.Items.Add(r);
             }
-
             comboBox_Connections.Refresh();
 
             SaveConfig();
@@ -266,7 +264,7 @@ namespace DBSource
             if (MessageBox.Show(@"Are you sure you want to delete " + comboBox_Connections.Text + @"?", Text,
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                var query = _connectionList.AsEnumerable()
+                var query = dataSet.ConnectionList.AsEnumerable()
                     .Where(r => r.Field<string>("Name") == comboBox_Connections.Text);
                 foreach (var r in query.ToList())
                 {
@@ -281,7 +279,7 @@ namespace DBSource
             if (comboBox_Connections.Text == "") return;
             var frm = new FrmAddConnection(true, comboBox_Connections.Text)
             {
-                ConnectionList = _connectionList,
+                ConnectionList = dataSet.ConnectionList,
                 Text = @"Edit connection"
             };
             frm.ShowDialog();
@@ -291,7 +289,7 @@ namespace DBSource
         {
             var frm = new FrmAddConnection
             {
-                ConnectionList = _connectionList,
+                ConnectionList = dataSet.ConnectionList,
                 Text = @"New connection"
             };
             frm.ShowDialog();
@@ -307,14 +305,14 @@ namespace DBSource
             {
                 using (TextWriter s = new StringWriter())
                 {
-                    _connectionList.WriteXml(s);
+                    dataSet.ConnectionList.WriteXml(s);
                     Properties.Settings.Default["Config"] = s.ToString();
                     Properties.Settings.Default.Save();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.ToString());
             }
         }
 
@@ -325,7 +323,6 @@ namespace DBSource
                 checkedListBox_objects.Items.Clear();
                 return;
             }
-
             try
             {
                 SplashScreenManager.ShowForm(typeof(FrmWait));
@@ -494,7 +491,7 @@ namespace DBSource
                 }
                 else
                 {
-                    resultText = "Done!";
+                    resultText = @"Done! Saved " + dataSet.DbObjects.Count.ToString() + @" objects";
 
                     var errors = e.Result as List<string>;
                     if (errors.Any())
@@ -691,6 +688,7 @@ namespace DBSource
             _loadAll = !_loadAll;
             checkedListBox_objectTypes.Enabled = !_loadAll;
             checkedListBox_objects.Enabled = !_loadAll;
+            button_loadObjects.Enabled = !_loadAll;
             button_loadAll.ButtonStyle = _loadAll ? BorderStyles.Flat : BorderStyles.Default;
         }
 
@@ -707,7 +705,13 @@ namespace DBSource
         private void comboBox_Connections_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox_Connections.SelectedIndex != -1)
+            {
                 buttonConnect_Style(ButtonConnect.Connect);
+            }
+            else
+            {
+                buttonConnect_Style(ButtonConnect.Init);
+            }
         }
 
         private void checkedListBox_objectTypes_MouseDown(object sender, MouseEventArgs e)
@@ -746,5 +750,15 @@ namespace DBSource
                 popupMenu2.ShowPopup(MousePosition);
             }
         }
+
+        private void comboBox_Connections_Leave(object sender, EventArgs e)
+        {
+            var q = dataSet.ConnectionList.Where(con => con.Name == comboBox_Connections.Text).Select(con => con.Name);
+            if (!q.Any())
+            {
+                comboBox_Connections.SelectedIndex = -1;
+            }
+        }
     }
 }
+
