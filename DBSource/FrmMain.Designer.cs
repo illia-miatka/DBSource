@@ -412,7 +412,7 @@ namespace DBSource
             // 
             // barButtonItem_Wiki
             // 
-            this.barButtonItem_Wiki.Caption = "Wiki";
+            this.barButtonItem_Wiki.Caption = "Manual";
             this.barButtonItem_Wiki.Id = 9;
             this.barButtonItem_Wiki.Name = "barButtonItem_Wiki";
             this.barButtonItem_Wiki.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem_Wiki_ItemClick);

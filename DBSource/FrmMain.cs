@@ -699,7 +699,9 @@ namespace DBSource
 
         private void barButtonItem_Wiki_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            System.Diagnostics.Process.Start(@"https://github.com/illia-miatka/DBSource/wiki");
+            string currentDir = AppDomain.CurrentDomain.BaseDirectory;
+            string fullPath = currentDir + @"Manual/DBSource_Manual.htm";
+            System.Diagnostics.Process.Start(fullPath);
         }
 
         private void comboBox_Connections_SelectedIndexChanged(object sender, EventArgs e)

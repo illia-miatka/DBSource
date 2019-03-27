@@ -234,6 +234,7 @@
     <None Include="DataSet.xss">
       <DependentUpon>DataSet.xsd</DependentUpon>
     </None>
+    <None Include="Manual\DBSource_Manual.files\themedata.thmx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -383,6 +384,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\icons8-link-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Manual\DBSource_Manual.files\colorschememapping.xml" />
+    <Content Include="Manual\DBSource_Manual.files\filelist.xml" />
+    <Content Include="Manual\DBSource_Manual.files\image001.png" />
+    <Content Include="Manual\DBSource_Manual.files\image003.png" />
+    <Content Include="Manual\DBSource_Manual.files\image005.png" />
+    <Content Include="Manual\DBSource_Manual.files\image007.png" />
+    <Content Include="Manual\DBSource_Manual.files\image009.jpg" />
+    <Content Include="Manual\DBSource_Manual.files\image010.jpg" />
+    <Content Include="Manual\DBSource_Manual.files\image011.jpg" />
+    <Content Include="Manual\DBSource_Manual.files\image012.jpg" />
+    <Content Include="Manual\DBSource_Manual.htm" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
