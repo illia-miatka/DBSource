@@ -34,5 +34,17 @@ namespace DBSource.Properties {
                 this["Config"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SkinName {
+            get {
+                return ((string)(this["SkinName"]));
+            }
+            set {
+                this["SkinName"] = value;
+            }
+        }
     }
 }
