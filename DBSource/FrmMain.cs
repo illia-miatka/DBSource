@@ -50,7 +50,7 @@ namespace DBSource
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
         }
 
@@ -312,7 +312,7 @@ namespace DBSource
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                //MessageBox.Show(ex.ToString());
             }
         }
 
@@ -700,7 +700,7 @@ namespace DBSource
         private void barButtonItem_Wiki_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             string currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            string fullPath = currentDir + @"Manual\DBSource_Manual.htm";
+            string fullPath = currentDir + @"Manual\DBSource_Manual.pdf";
             System.Diagnostics.Process.Start(fullPath);
         }
 
