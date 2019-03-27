@@ -700,7 +700,7 @@ namespace DBSource
         private void barButtonItem_Wiki_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             string currentDir = AppDomain.CurrentDomain.BaseDirectory;
-            string fullPath = currentDir + @"Manual/DBSource_Manual.htm";
+            string fullPath = currentDir + @"Manual\DBSource_Manual.htm";
             System.Diagnostics.Process.Start(fullPath);
         }
 
