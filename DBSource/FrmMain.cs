@@ -491,7 +491,7 @@ namespace DBSource
                 }
                 else
                 {
-                    resultText = @"Done! Saved " + checkedListBox_objects.SelectedItems.Count + @" objects";
+                    resultText = @"Done! Saved " + checkedListBox_objects.CheckedItems.Count + @" objects";
 
                     var errors = e.Result as List<string>;
                     if (errors.Any())
