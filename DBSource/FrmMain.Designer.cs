@@ -31,6 +31,7 @@ namespace DBSource
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             DevExpress.XtraSplashScreen.SplashScreenManager splashScreenManager1 = new DevExpress.XtraSplashScreen.SplashScreenManager(this, null, true, true);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.button_connect = new DevExpress.XtraEditors.SimpleButton();
@@ -49,12 +50,12 @@ namespace DBSource
             this.button_addDateFilter = new DevExpress.XtraEditors.SimpleButton();
             this.button_currentSchema = new DevExpress.XtraEditors.SimpleButton();
             this.checkedListBox_objects = new DevExpress.XtraEditors.CheckedListBoxControl();
-            this.dbObjectsBindingSource = new System.Windows.Forms.BindingSource();
+            this.dbObjectsBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.dataSet = new DBSource.DataSet();
             this.checkedListBox_objectTypes = new DevExpress.XtraEditors.CheckedListBoxControl();
-            this.dbObjectTypesBindingSource = new System.Windows.Forms.BindingSource();
+            this.dbObjectTypesBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.button_loadAll = new DevExpress.XtraEditors.SimpleButton();
-            this.barManager1 = new DevExpress.XtraBars.BarManager();
+            this.barManager1 = new DevExpress.XtraBars.BarManager(this.components);
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.barSubItem_Connection = new DevExpress.XtraBars.BarSubItem();
             this.barButtonItem_Add = new DevExpress.XtraBars.BarButtonItem();
@@ -78,8 +79,8 @@ namespace DBSource
             this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
             this.barButtonItem3 = new DevExpress.XtraBars.BarButtonItem();
             this.comboBox_Connections = new DevExpress.XtraEditors.ComboBoxEdit();
-            this.popupMenu1 = new DevExpress.XtraBars.PopupMenu();
-            this.popupMenu2 = new DevExpress.XtraBars.PopupMenu();
+            this.popupMenu1 = new DevExpress.XtraBars.PopupMenu(this.components);
+            this.popupMenu2 = new DevExpress.XtraBars.PopupMenu(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.checkedListBox_objects)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbObjectsBindingSource)).BeginInit();
@@ -562,6 +563,7 @@ namespace DBSource
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(816, 588);
             this.Name = "FrmMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "DBSource";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Frm_Main_FormClosed);
             this.Load += new System.EventHandler(this.Frm_Main_Load);

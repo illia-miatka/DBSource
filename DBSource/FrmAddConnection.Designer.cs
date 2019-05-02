@@ -436,6 +436,7 @@ namespace DBSource
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "FrmAddConnection";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "New connection";
             this.Shown += new System.EventHandler(this.Frm_AddConnection_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
