@@ -5,7 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using DevExpress.DXCore.Controls.XtraEditors;
+using DevExpress.XtraEditors;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraSplashScreen;
